@@ -1,1 +1,2175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a1628">
+<title>YM Command Center</title>
+<link rel="manifest" href="#" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ym-navy: #0a1628;
+  --ym-blue: #1a3a6e;
+  --ym-accent: #2563eb;
+  --ym-accent-light: #dbeafe;
+  --ym-white: #ffffff;
+  --ym-bg: #f4f6fb;
+  --ym-surface: #ffffff;
+  --ym-border: #e2e8f0;
+  --ym-text: #0f172a;
+  --ym-text-muted: #64748b;
+  --ym-text-light: #94a3b8;
+  --ym-success: #16a34a;
+  --ym-success-bg: #dcfce7;
+  --ym-warning: #d97706;
+  --ym-warning-bg: #fef3c7;
+  --ym-danger: #dc2626;
+  --ym-danger-bg: #fee2e2;
+  --ym-info: #0284c7;
+  --ym-info-bg: #e0f2fe;
+  --ym-purple: #7c3aed;
+  --ym-purple-bg: #ede9fe;
+  --sidebar-w: 220px;
+  --header-h: 60px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  font-size: 14px;
+}
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--ym-bg);
+  color: var(--ym-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── HEADER ─── */
+#header {
+  background: var(--ym-navy);
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+#header .logo {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+#header .logo span { color: #60a5fa; }
+#header-date {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-left: auto;
+  white-space: nowrap;
+}
+#burger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* ─── LAYOUT ─── */
+#app {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  height: calc(100vh - var(--header-h));
+}
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--ym-navy);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+  transition: transform 0.25s;
+}
+#sidebar nav { padding: 12px 0; flex: 1; }
+#sidebar .nav-section {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 12px 18px 4px;
+}
+#sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+#sidebar .nav-item:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+#sidebar .nav-item.active {
+  background: rgba(37,99,235,0.18);
+  color: #60a5fa;
+  border-left-color: #2563eb;
+  font-weight: 500;
+}
+#sidebar .nav-item .icon { font-size: 16px; width: 18px; text-align: center; }
+
+/* ─── MAIN ─── */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── SECTIONS ─── */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ─── CAPTURE BUTTON ─── */
+#fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ym-accent);
+  color: #fff;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: background 0.15s, transform 0.15s;
+}
+#fab:hover { background: var(--ym-blue); transform: scale(1.08); }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--ym-surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--ym-border);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+.card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ym-navy);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .icon { color: var(--ym-accent); }
+
+/* ─── GRID HELPERS ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* ─── STAT CARDS ─── */
+.stat-card {
+  background: var(--ym-surface);
+  border: 1px solid var(--ym-border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+}
+.stat-label { font-size: 11px; color: var(--ym-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.stat-value { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 700; color: var(--ym-navy); }
+.stat-sub { font-size: 11px; color: var(--ym-text-light); margin-top: 2px; }
+
+/* ─── BADGES ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-blue { background: var(--ym-accent-light); color: #1d4ed8; }
+.badge-green { background: var(--ym-success-bg); color: var(--ym-success); }
+.badge-yellow { background: var(--ym-warning-bg); color: var(--ym-warning); }
+.badge-red { background: var(--ym-danger-bg); color: var(--ym-danger); }
+.badge-gray { background: #f1f5f9; color: var(--ym-text-muted); }
+.badge-purple { background: var(--ym-purple-bg); color: var(--ym-purple); }
+
+/* ─── TABLES ─── */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: var(--ym-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--ym-border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--ym-text);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+
+/* ─── TOOLBAR ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.toolbar h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ym-navy);
+  flex: 1;
+  min-width: 120px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ym-border);
+  background: var(--ym-surface);
+  color: var(--ym-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: #f1f5f9; }
+.btn-primary {
+  background: var(--ym-accent);
+  color: #fff;
+  border-color: var(--ym-accent);
+}
+.btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.btn-danger { color: var(--ym-danger); border-color: var(--ym-danger-bg); }
+.btn-danger:hover { background: var(--ym-danger-bg); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* ─── FILTERS ─── */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.filter-chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--ym-border);
+  background: var(--ym-surface);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.filter-chip:hover { border-color: var(--ym-accent); color: var(--ym-accent); }
+.filter-chip.active { background: var(--ym-accent); color: #fff; border-color: var(--ym-accent); }
+select.filter-select {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ym-border);
+  background: var(--ym-surface);
+  font-size: 12px;
+  color: var(--ym-text);
+  cursor: pointer;
+}
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,22,40,0.55);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--ym-surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--ym-border);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ym-navy);
+  position: sticky;
+  top: 0;
+  background: var(--ym-surface);
+}
+.modal-body { padding: 20px 22px; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--ym-border);
+}
+
+/* ─── FORM ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 12px; font-weight: 600; color: var(--ym-text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+input, select, textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--ym-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--ym-text);
+  background: var(--ym-surface);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ym-accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+textarea { resize: vertical; min-height: 70px; }
+
+/* ─── PROGRESS ─── */
+.progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--ym-accent); transition: width 0.4s; }
+
+/* ─── CALENDAR ─── */
+.cal-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  width: fit-content;
+  margin-bottom: 18px;
+}
+.cal-tab {
+  padding: 6px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--ym-text-muted);
+  transition: all 0.15s;
+}
+.cal-tab.active { background: var(--ym-surface); color: var(--ym-accent); box-shadow: var(--shadow); font-weight: 600; }
+
+/* Week view */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.week-day {
+  background: var(--ym-surface);
+  border: 1px solid var(--ym-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  min-height: 140px;
+}
+.week-day-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ym-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.week-day-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ym-navy);
+  margin-bottom: 6px;
+}
+.week-day.today { border-color: var(--ym-accent); background: #eff6ff; }
+.week-day.today .week-day-num { color: var(--ym-accent); }
+.cal-event {
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event-task { background: var(--ym-accent-light); color: #1d4ed8; }
+.cal-event-entrega { background: var(--ym-purple-bg); color: var(--ym-purple); }
+.cal-event-financeiro { background: var(--ym-warning-bg); color: var(--ym-warning); }
+.cal-event-habito { background: var(--ym-success-bg); color: var(--ym-success); }
+
+/* Month grid */
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.month-cell {
+  background: var(--ym-surface);
+  border: 1px solid var(--ym-border);
+  border-radius: var(--radius-sm);
+  min-height: 80px;
+  padding: 6px;
+  font-size: 12px;
+}
+.month-cell.today { border-color: var(--ym-accent); }
+.month-day-num { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--ym-text-muted); }
+.month-cell.today .month-day-num { color: var(--ym-accent); }
+
+/* ─── HABITS ─── */
+.habit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.habit-row:last-child { border-bottom: none; }
+.habit-label { flex: 1; font-size: 13px; font-weight: 500; }
+.habit-check {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--ym-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.habit-check.done { background: var(--ym-success); border-color: var(--ym-success); color: #fff; }
+.habit-streak { font-size: 11px; color: var(--ym-text-light); white-space: nowrap; }
+
+/* ─── FINANCE ─── */
+.meta-bar {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.meta-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.meta-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: var(--ym-navy); }
+.meta-pct { font-weight: 700; color: var(--ym-accent); }
+
+/* ─── OVERLAY ─── */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 90;
+}
+
+/* ─── TOAST ─── */
+#toast {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  background: var(--ym-navy);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 500;
+  box-shadow: var(--shadow-md);
+}
+#toast.show { opacity: 1; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  :root { --sidebar-w: 240px; }
+  #burger { display: flex; }
+  #sidebar {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    height: calc(100vh - var(--header-h));
+    z-index: 95;
+    transform: translateX(-100%);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar-overlay.open { display: block; }
+  #main { padding: 16px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  .week-grid { grid-template-columns: repeat(7, minmax(90px, 1fr)); overflow-x: auto; }
+  .month-grid { grid-template-columns: repeat(7, minmax(40px, 1fr)); }
+  .form-grid { grid-template-columns: 1fr; }
+  #fab { bottom: 16px; right: 16px; }
+}
+@media (max-width: 480px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .toolbar { gap: 8px; }
+  .toolbar h2 { font-size: 16px; }
+}
+
+/* ─── CONFIG SETTINGS ─── */
+.config-section {
+  background: var(--ym-surface);
+  border: 1px solid var(--ym-border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 14px;
+}
+.config-section h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ym-navy);
+  margin-bottom: 10px;
+}
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid var(--ym-border);
+  border-radius: 20px;
+  padding: 3px 10px 3px 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ym-text-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+.tag-remove:hover { color: var(--ym-danger); }
+.tag-add-row { display: flex; gap: 8px; }
+.tag-add-row input { flex: 1; }
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ym-text-light);
+}
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+
+/* ─── ACTION MENU ─── */
+.action-btns { display: flex; gap: 4px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="header">
+  <button id="burger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+  <div class="logo">YM <span>Command</span></div>
+  <div id="header-date"></div>
+</header>
+
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <nav>
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" onclick="showSection('dashboard')"><span class="icon">⬡</span> Dashboard</div>
+      <div class="nav-item" onclick="showSection('tarefas')"><span class="icon">✓</span> Tarefas</div>
+      <div class="nav-item" onclick="showSection('calendario')"><span class="icon">◫</span> Calendário</div>
+
+      <div class="nav-section">Clientes</div>
+      <div class="nav-item" onclick="showSection('clientes')"><span class="icon">◉</span> Clientes / CRM</div>
+      <div class="nav-item" onclick="showSection('subtarefas')"><span class="icon">◈</span> Subtarefas</div>
+      <div class="nav-item" onclick="showSection('entregas')"><span class="icon">◪</span> Entregas</div>
+
+      <div class="nav-section">Projetos</div>
+      <div class="nav-item" onclick="showSection('projetos')"><span class="icon">◧</span> Projetos</div>
+
+      <div class="nav-section">Finanças</div>
+      <div class="nav-item" onclick="showSection('financeiro')"><span class="icon">◊</span> Financeiro</div>
+      <div class="nav-item" onclick="showSection('plano')"><span class="icon">▷</span> Plano Financeiro</div>
+
+      <div class="nav-section">Bem-estar</div>
+      <div class="nav-item" onclick="showSection('habitos')"><span class="icon">◎</span> Hábitos</div>
+
+      <div class="nav-section">Captura</div>
+      <div class="nav-item" onclick="showSection('ideias')"><span class="icon">◌</span> Ideias Rápidas</div>
+
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="showSection('config')"><span class="icon">◉</span> Configurações</div>
+      <div class="nav-item" onclick="showSection('sheets')"><span class="icon">◫</span> Google Sheets</div>
+    </nav>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main id="main">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <section id="sec-dashboard" class="section active">
+      <div class="toolbar">
+        <h2 id="dash-title">Bom dia!</h2>
+        <button class="btn btn-primary btn-sm" onclick="openCaptura()">+ Captura rápida</button>
+      </div>
+
+      <div class="grid-4" id="dash-stats" style="margin-bottom:20px"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="icon">✓</span> Tarefas de hoje</div>
+          <div id="dash-tarefas-hoje"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">◪</span> Entregas em aberto</div>
+          <div id="dash-entregas"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">◊</span> Financeiro do mês</div>
+          <div id="dash-financeiro"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">◎</span> Hábitos de hoje</div>
+          <div id="dash-habitos"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TAREFAS ═══ -->
+    <section id="sec-tarefas" class="section">
+      <div class="toolbar">
+        <h2>Tarefas</h2>
+        <button class="btn btn-primary" onclick="openModal('tarefa')">+ Nova tarefa</button>
+      </div>
+      <div class="filters" id="filtros-tarefas">
+        <span class="filter-chip active" onclick="filterTarefas('todas',this)">Todas</span>
+        <span class="filter-chip" onclick="filterTarefas('hoje',this)">Hoje</span>
+        <span class="filter-chip" onclick="filterTarefas('atrasadas',this)">Atrasadas</span>
+        <span class="filter-chip" onclick="filterTarefas('semana',this)">Esta semana</span>
+        <select class="filter-select" onchange="filterTarefasByField('prioridade',this.value)" id="sel-prioridade">
+          <option value="">Prioridade</option>
+        </select>
+        <select class="filter-select" onchange="filterTarefasByField('area',this.value)" id="sel-area">
+          <option value="">Área</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="table-tarefas">
+            <thead><tr>
+              <th>Tarefa</th><th>Área</th><th>Cliente</th>
+              <th>Prioridade</th><th>Status</th><th>Vencimento</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-tarefas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CLIENTES ═══ -->
+    <section id="sec-clientes" class="section">
+      <div class="toolbar">
+        <h2>Clientes / CRM</h2>
+        <button class="btn btn-primary" onclick="openModal('cliente')">+ Novo cliente</button>
+      </div>
+      <div class="filters">
+        <span class="filter-chip active" onclick="filterClientes('todos',this)">Todos</span>
+        <span class="filter-chip" onclick="filterClientes('ativo',this)">Ativos</span>
+        <span class="filter-chip" onclick="filterClientes('lead',this)">Leads</span>
+        <span class="filter-chip" onclick="filterClientes('pausado',this)">Pausados</span>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="table-clientes">
+            <thead><tr>
+              <th>Nome</th><th>Empresa</th><th>Serviço</th>
+              <th>Status</th><th>Próxima ação</th><th>Prazo</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-clientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SUBTAREFAS ═══ -->
+    <section id="sec-subtarefas" class="section">
+      <div class="toolbar">
+        <h2>Subtarefas por cliente</h2>
+        <button class="btn btn-primary" onclick="openModal('subtarefa')">+ Nova subtarefa</button>
+      </div>
+      <div class="filters">
+        <select class="filter-select" onchange="filterSubtarefas(this.value)" id="sel-cliente-sub">
+          <option value="">Todos os clientes</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Tarefa principal</th><th>Subtarefa</th>
+              <th>Responsável</th><th>Prazo</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-subtarefas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ENTREGAS ═══ -->
+    <section id="sec-entregas" class="section">
+      <div class="toolbar">
+        <h2>Entregas</h2>
+        <button class="btn btn-primary" onclick="openModal('entrega')">+ Nova entrega</button>
+      </div>
+      <div class="filters">
+        <span class="filter-chip active" onclick="filterEntregas('todas',this)">Todas</span>
+        <span class="filter-chip" onclick="filterEntregas('em andamento',this)">Em andamento</span>
+        <span class="filter-chip" onclick="filterEntregas('pendente',this)">Pendentes</span>
+        <span class="filter-chip" onclick="filterEntregas('concluida',this)">Concluídas</span>
+        <select class="filter-select" onchange="filterEntregasByCliente(this.value)" id="sel-cliente-entrega">
+          <option value="">Todos os clientes</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Tipo</th><th>Descrição</th>
+              <th>Prazo</th><th>Prioridade</th><th>Status</th><th>Link</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-entregas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PROJETOS ═══ -->
+    <section id="sec-projetos" class="section">
+      <div class="toolbar">
+        <h2>Projetos</h2>
+        <button class="btn btn-primary" onclick="openModal('projeto')">+ Novo projeto</button>
+      </div>
+      <div id="grid-projetos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+    </section>
+
+    <!-- ═══ FINANCEIRO ═══ -->
+    <section id="sec-financeiro" class="section">
+      <div class="toolbar">
+        <h2>Financeiro</h2>
+        <button class="btn btn-primary" onclick="openModal('financeiro')">+ Novo registro</button>
+      </div>
+      <div id="meta-financeiro" class="meta-bar"></div>
+      <div class="grid-4" id="stats-fin" style="margin-bottom:16px"></div>
+      <div class="filters">
+        <span class="filter-chip active" onclick="filterFin('todos',this)">Todos</span>
+        <span class="filter-chip" onclick="filterFin('entrada',this)">Entradas</span>
+        <span class="filter-chip" onclick="filterFin('saida',this)">Saídas</span>
+        <span class="filter-chip" onclick="filterFin('pendente',this)">Pendentes</span>
+        <span class="filter-chip" onclick="filterFin('atrasado',this)">Atrasados</span>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th>
+              <th>Categoria</th><th>Status</th><th>Forma</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-financeiro"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PLANO FINANCEIRO ═══ -->
+    <section id="sec-plano" class="section">
+      <div class="toolbar">
+        <h2>Plano Financeiro</h2>
+        <button class="btn btn-primary" onclick="openModal('plano')">+ Nova ação</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Objetivo</th><th>Ação</th><th>Tipo</th>
+              <th>Valor estimado</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-plano"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HÁBITOS ═══ -->
+    <section id="sec-habitos" class="section">
+      <div class="toolbar">
+        <h2>Hábitos</h2>
+        <button class="btn btn-primary btn-sm" onclick="openModal('habito')">+ Registrar dia</button>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">◎ Checklist de hoje</div>
+          <div id="checklist-habitos"></div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+            <div class="form-group" style="flex:1;min-width:100px">
+              <label>Água (L)</label>
+              <input type="number" id="hab-agua" min="0" max="5" step="0.5" placeholder="2.0" style="width:100%">
+            </div>
+            <div class="form-group" style="flex:1;min-width:100px">
+              <label>Peso (kg)</label>
+              <input type="number" id="hab-peso" step="0.1" placeholder="0.0" style="width:100%">
+            </div>
+            <div class="form-group" style="flex:1;min-width:100px">
+              <label>Calorias</label>
+              <input type="number" id="hab-calorias" placeholder="0" style="width:100%">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:10px">
+            <label>Observação do dia</label>
+            <textarea id="hab-obs" rows="2" placeholder="Como foi o dia?"></textarea>
+          </div>
+          <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="salvarHabitoHoje()">Salvar hábitos de hoje</button>
+        </div>
+        <div class="card">
+          <div class="card-title">◎ Histórico (últimos 14 dias)</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Água</th><th>Exercício</th><th>Alimentação</th><th>Peso</th><th>Ações</th></tr></thead>
+              <tbody id="tbody-habitos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CALENDÁRIO ═══ -->
+    <section id="sec-calendario" class="section">
+      <div class="toolbar">
+        <h2>Calendário</h2>
+        <div id="cal-nav" style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-sm" onclick="calNav(-1)">&#8592;</button>
+          <span id="cal-label" style="font-weight:600;font-size:13px;min-width:160px;text-align:center"></span>
+          <button class="btn btn-sm" onclick="calNav(1)">&#8594;</button>
+        </div>
+      </div>
+      <div class="cal-tabs">
+        <button class="cal-tab" onclick="setCalView('hoje',this)">Hoje</button>
+        <button class="cal-tab active" onclick="setCalView('semana',this)">Semana</button>
+        <button class="cal-tab" onclick="setCalView('mes',this)">30 dias</button>
+      </div>
+      <div id="cal-content"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:11px">
+        <span class="badge badge-blue">■ Tarefa</span>
+        <span class="badge badge-purple">■ Entrega</span>
+        <span class="badge badge-yellow">■ Financeiro</span>
+        <span class="badge badge-green">■ Hábito</span>
+      </div>
+    </section>
+
+    <!-- ═══ IDEIAS RÁPIDAS ═══ -->
+    <section id="sec-ideias" class="section">
+      <div class="toolbar">
+        <h2>Ideias Rápidas</h2>
+        <button class="btn btn-primary" onclick="openCaptura()">+ Captura rápida</button>
+      </div>
+      <div class="filters">
+        <span class="filter-chip active" onclick="filterIdeias('todas',this)">Todas</span>
+        <span class="filter-chip" onclick="filterIdeias('ideia',this)">Ideias</span>
+        <span class="filter-chip" onclick="filterIdeias('tarefa',this)">Tarefas</span>
+        <span class="filter-chip" onclick="filterIdeias('compra',this)">Compras</span>
+        <span class="filter-chip" onclick="filterIdeias('pendencia',this)">Pendências</span>
+        <span class="filter-chip" onclick="filterIdeias('lembrete',this)">Lembretes</span>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tipo</th><th>Conteúdo</th><th>Área</th><th>Prioridade</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbody-ideias"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONFIGURAÇÕES ═══ -->
+    <section id="sec-config" class="section">
+      <div class="toolbar"><h2>Configurações</h2></div>
+      <div class="grid-2" id="config-grid"></div>
+    </section>
+
+    <!-- ═══ GOOGLE SHEETS ═══ -->
+    <section id="sec-sheets" class="section">
+      <div class="toolbar"><h2>Conexão Google Sheets</h2></div>
+      <div class="card" style="max-width:640px">
+        <div class="card-title">◫ URL da planilha</div>
+        <p style="font-size:13px;color:var(--ym-text-muted);margin-bottom:14px">
+          Cole a URL do Apps Script (Web App) para sincronizar com Google Sheets.
+          Os dados também ficam salvos localmente no navegador automaticamente.
+        </p>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>URL do Google Apps Script (Web App)</label>
+          <input type="url" id="sheets-url" placeholder="https://script.google.com/macros/s/..." style="width:100%">
+        </div>
+        <button class="btn btn-primary" onclick="saveConfig('sheets_url', document.getElementById('sheets-url').value); showToast('URL salva!')">Salvar URL</button>
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--ym-border)">
+          <div class="card-title">Como configurar</div>
+          <ol style="font-size:13px;color:var(--ym-text-muted);line-height:2;padding-left:18px">
+            <li>Crie uma planilha Google Sheets com as 12 abas</li>
+            <li>Abra o editor de scripts: Extensões → Apps Script</li>
+            <li>Cole o código do Apps Script fornecido</li>
+            <li>Clique em Implantar → Nova implantação → App da Web</li>
+            <li>Defina acesso: "Qualquer pessoa"</li>
+            <li>Copie a URL gerada e cole acima</li>
+          </ol>
+        </div>
+        <div style="margin-top:20px;padding:14px;background:#f8fafc;border-radius:var(--radius-sm);border:1px solid var(--ym-border)">
+          <p style="font-size:12px;color:var(--ym-text-muted);font-weight:600;margin-bottom:6px">IMPORTANTE</p>
+          <p style="font-size:12px;color:var(--ym-text-muted)">Sem a URL configurada, todos os dados são salvos localmente no seu navegador (localStorage). Configure o Sheets para backup permanente e acesso em múltiplos dispositivos.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FAB -->
+<button id="fab" onclick="openCaptura()" title="Captura rápida">+</button>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ═══ MODAL GENÉRICO ═══ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-title">Novo registro</span>
+      <button class="btn btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════
+const DB = {
+  tarefas: [], clientes: [], subtarefas: [], entregas: [],
+  projetos: [], financeiro: [], plano: [], habitos: [], ideias: [],
+  config: {
+    sheets_url: '',
+    STATUS_TAREFAS: ['pendente','em andamento','aguardando retorno','concluida','atrasada','cancelada'],
+    STATUS_CLIENTES: ['lead','ativo','aguardando retorno','em execucao','finalizado','pausado'],
+    STATUS_FINANCEIRO: ['previsto','recebido','pago','pendente','atrasado','cancelado'],
+    PRIORIDADES: ['baixa','media','alta','urgente'],
+    AREAS: ['YM','CLIENTE','PESSOAL','FINANCEIRO','SAUDE','SUNSHINE','MENOS_BUCHO'],
+    TIPOS_ENTREGA: ['Raio-X Estratégico','Calendário Editorial','Roteiros','Diagnóstico','Proposta','Ajustes de Instagram','Acompanhamento mensal','Outro'],
+    meta_vendas: 5000,
+    nome_usuario: 'YM'
+  }
+};
+
+let modalType = null;
+let editId = null;
+let calView = 'semana';
+let calOffset = 0;
+
+// ═══════════════════════════════════════════════
+// PERSISTÊNCIA
+// ═══════════════════════════════════════════════
+function saveAll() {
+  localStorage.setItem('ym_db', JSON.stringify(DB));
+  syncSheets();
+}
+
+function loadAll() {
+  const saved = localStorage.getItem('ym_db');
+  if (saved) {
+    const d = JSON.parse(saved);
+    Object.keys(d).forEach(k => {
+      if (k === 'config') Object.assign(DB.config, d.config);
+      else if (Array.isArray(d[k])) DB[k] = d[k];
+    });
+  }
+}
+
+function syncSheets() {
+  const url = DB.config.sheets_url;
+  if (!url) return;
+  fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'saveAll', data: DB })
+  }).catch(() => {});
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+function isOverdue(d) { return d && d < today(); }
+function isToday(d) { return d === today(); }
+function isThisWeek(d) {
+  if (!d) return false;
+  const now = new Date();
+  const mon = new Date(now); mon.setDate(now.getDate() - now.getDay() + 1);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const dt = new Date(d + 'T12:00:00');
+  return dt >= mon && dt <= sun;
+}
+
+function currencyBR(v) {
+  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+}
+
+function statusBadge(s) {
+  if (!s) return '<span class="badge badge-gray">—</span>';
+  const map = {
+    'pendente':'badge-yellow','em andamento':'badge-blue','aguardando retorno':'badge-yellow',
+    'concluida':'badge-green','atrasada':'badge-red','cancelada':'badge-gray',
+    'ativo':'badge-green','lead':'badge-blue','em execucao':'badge-blue',
+    'finalizado':'badge-gray','pausado':'badge-yellow',
+    'recebido':'badge-green','pago':'badge-green','previsto':'badge-blue',
+    'atrasado':'badge-red','em andamento entrega':'badge-blue'
+  };
+  const cls = map[s] || 'badge-gray';
+  return `<span class="badge ${cls}">${s}</span>`;
+}
+
+function prioridadeBadge(p) {
+  if (!p) return '';
+  const map = {'baixa':'badge-gray','media':'badge-blue','alta':'badge-yellow','urgente':'badge-red'};
+  return `<span class="badge ${map[p]||'badge-gray'}">${p}</span>`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ═══════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById('sec-' + id);
+  if (sec) sec.classList.add('active');
+  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if (nav) nav.classList.add('active');
+  closeSidebar();
+  renderSection(id);
+}
+
+function renderSection(id) {
+  const fns = {
+    dashboard: renderDashboard,
+    tarefas: renderTarefas,
+    clientes: renderClientes,
+    subtarefas: renderSubtarefas,
+    entregas: renderEntregas,
+    projetos: renderProjetos,
+    financeiro: renderFinanceiro,
+    plano: renderPlano,
+    habitos: renderHabitos,
+    calendario: renderCalendario,
+    ideias: renderIdeias,
+    config: renderConfig
+  };
+  if (fns[id]) fns[id]();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('dash-title').textContent = `${greeting}, ${DB.config.nome_usuario || 'YM'}!`;
+
+  const tarefasHoje = DB.tarefas.filter(t => isToday(t.vencimento) && t.status !== 'concluida');
+  const atrasadas = DB.tarefas.filter(t => isOverdue(t.vencimento) && t.status !== 'concluida');
+  const entregasAbertas = DB.entregas.filter(e => e.status !== 'concluida' && e.status !== 'cancelada');
+  const recebido = DB.financeiro.filter(f => f.tipo === 'entrada' && (f.status === 'recebido' || f.status === 'pago') && f.data && f.data.slice(0,7) === today().slice(0,7)).reduce((a,f) => a + Number(f.valor||0), 0);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Tarefas hoje</div>
+      <div class="stat-value">${tarefasHoje.length}</div>
+      <div class="stat-sub">${atrasadas.length} atrasadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Entregas abertas</div>
+      <div class="stat-value">${entregasAbertas.length}</div>
+      <div class="stat-sub">${DB.clientes.filter(c=>c.status==='ativo').length} clientes ativos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Recebido no mês</div>
+      <div class="stat-value" style="font-size:18px">${currencyBR(recebido)}</div>
+      <div class="stat-sub">Meta: ${currencyBR(DB.config.meta_vendas)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Hábitos hoje</div>
+      <div class="stat-value" id="stat-habitos-hoje">—</div>
+      <div class="stat-sub">Cheque o checklist</div>
+    </div>
+  `;
+
+  // Tarefas hoje
+  const th = document.getElementById('dash-tarefas-hoje');
+  if (!tarefasHoje.length && !atrasadas.length) {
+    th.innerHTML = '<div class="empty-state"><p>Nenhuma tarefa para hoje.</p></div>';
+  } else {
+    const list = [...atrasadas.map(t => ({...t, _late:true})), ...tarefasHoje].slice(0,6);
+    th.innerHTML = list.map(t => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1;font-size:13px${t._late?' color:var(--ym-danger)':''}">${t.titulo || '—'}</div>
+        ${t._late ? '<span class="badge badge-red">atrasada</span>' : ''}
+        ${prioridadeBadge(t.prioridade)}
+      </div>
+    `).join('') + (tarefasHoje.length > 6 ? `<p style="font-size:12px;color:var(--ym-text-light);margin-top:6px">+${tarefasHoje.length-6} mais</p>` : '');
+  }
+
+  // Entregas
+  const de = document.getElementById('dash-entregas');
+  if (!entregasAbertas.length) {
+    de.innerHTML = '<div class="empty-state"><p>Nenhuma entrega em aberto.</p></div>';
+  } else {
+    de.innerHTML = entregasAbertas.slice(0,5).map(e => {
+      const cli = DB.clientes.find(c => c.id === e.cliente_id);
+      return `
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">${e.tipo_entrega || '—'}</div>
+            <div style="font-size:11px;color:var(--ym-text-light)">${cli ? cli.nome : '—'} · Prazo: ${fmtDate(e.prazo_entrega)}</div>
+          </div>
+          ${statusBadge(e.status)}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Financeiro
+  const df = document.getElementById('dash-financeiro');
+  const meta = Number(DB.config.meta_vendas || 0);
+  const pct = meta ? Math.min(100, Math.round(recebido / meta * 100)) : 0;
+  df.innerHTML = `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>Meta do mês: ${currencyBR(meta)}</span>
+        <span style="font-weight:600;color:var(--ym-accent)">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--ym-text-muted);margin-top:4px">Faltam ${currencyBR(Math.max(0, meta - recebido))}</div>
+    </div>
+    ${DB.financeiro.filter(f => f.status === 'pendente' || f.status === 'atrasado').slice(0,3).map(f => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1;font-size:13px">${f.descricao||'—'}</div>
+        <span style="font-weight:600;font-size:13px${f.tipo==='entrada'?' color:var(--ym-success)':' color:var(--ym-danger)'}">${f.tipo==='saida'?'-':''}${currencyBR(f.valor)}</span>
+        ${statusBadge(f.status)}
+      </div>
+    `).join('')}
+  `;
+
+  // Hábitos
+  const dh = document.getElementById('dash-habitos');
+  const habHoje = DB.habitos.find(h => h.data === today());
+  const checks = ['exercicio','alimentacao','meditacao','alcool_nao'];
+  const done = habHoje ? checks.filter(c => habHoje[c]).length : 0;
+  document.getElementById('stat-habitos-hoje').textContent = `${done}/${checks.length}`;
+  dh.innerHTML = `
+    ${['Exercício','Alimentação saudável','Meditação/offline','Sem álcool'].map((lb, i) => {
+      const key = checks[i];
+      const checked = habHoje && habHoje[key];
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+        <div class="habit-check ${checked ? 'done' : ''}" onclick="toggleHabitoRapido('${key}')">${checked ? '✓' : ''}</div>
+        <span style="font-size:13px">${lb}</span>
+      </div>`;
+    }).join('')}
+    ${habHoje && habHoje.agua ? `<div style="font-size:12px;color:var(--ym-text-muted);margin-top:8px">Água: ${habHoje.agua}L · Peso: ${habHoje.peso||'—'}kg</div>` : ''}
+  `;
+}
+
+function toggleHabitoRapido(key) {
+  let h = DB.habitos.find(h => h.data === today());
+  if (!h) { h = { id: uid(), data: today() }; DB.habitos.push(h); }
+  h[key] = !h[key];
+  saveAll();
+  renderDashboard();
+}
+
+// ═══════════════════════════════════════════════
+// TAREFAS
+// ═══════════════════════════════════════════════
+let tarefasFilter = 'todas';
+let tarefasPrioridade = '';
+let tarefasArea = '';
+
+function renderTarefas() {
+  populateSelect('sel-prioridade', DB.config.PRIORIDADES, 'Prioridade');
+  populateSelect('sel-area', DB.config.AREAS, 'Área');
+  renderTabelaTarefas();
+}
+
+function renderTabelaTarefas() {
+  let data = [...DB.tarefas];
+  if (tarefasFilter === 'hoje') data = data.filter(t => isToday(t.vencimento));
+  else if (tarefasFilter === 'atrasadas') data = data.filter(t => isOverdue(t.vencimento) && t.status !== 'concluida');
+  else if (tarefasFilter === 'semana') data = data.filter(t => isThisWeek(t.vencimento));
+  if (tarefasPrioridade) data = data.filter(t => t.prioridade === tarefasPrioridade);
+  if (tarefasArea) data = data.filter(t => t.area === tarefasArea);
+  data.sort((a,b) => {
+    const po = {urgente:0,alta:1,media:2,baixa:3};
+    return (po[a.prioridade]||4) - (po[b.prioridade]||4);
+  });
+
+  const tbody = document.getElementById('tbody-tarefas');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhuma tarefa encontrada.</p></div></td></tr>`;
+    return;
+  }
+  const cli = Object.fromEntries(DB.clientes.map(c => [c.id, c.nome]));
+  tbody.innerHTML = data.map(t => `
+    <tr>
+      <td style="font-weight:500;max-width:200px">${t.titulo||'—'}</td>
+      <td>${t.area ? `<span class="badge badge-gray">${t.area}</span>` : '—'}</td>
+      <td style="font-size:12px;color:var(--ym-text-muted)">${t.cliente_id ? cli[t.cliente_id]||t.cliente_id : '—'}</td>
+      <td>${prioridadeBadge(t.prioridade)}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td style="font-size:12px;color:${isOverdue(t.vencimento) && t.status!=='concluida' ? 'var(--ym-danger)' : 'var(--ym-text-muted)'}">${fmtDate(t.vencimento)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('tarefa','${t.id}')">✎</button>
+        ${t.status!=='concluida' ? `<button class="btn btn-sm" style="color:var(--ym-success)" onclick="concluirTarefa('${t.id}')">✓</button>` : ''}
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('tarefa','${t.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterTarefas(f, el) {
+  tarefasFilter = f;
+  document.querySelectorAll('#filtros-tarefas .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaTarefas();
+}
+function filterTarefasByField(field, val) {
+  if (field === 'prioridade') tarefasPrioridade = val;
+  if (field === 'area') tarefasArea = val;
+  renderTabelaTarefas();
+}
+function concluirTarefa(id) {
+  const t = DB.tarefas.find(t => t.id === id);
+  if (t) { t.status = 'concluida'; t.concluido_em = today(); saveAll(); renderTabelaTarefas(); showToast('Tarefa concluída!'); }
+}
+
+// ═══════════════════════════════════════════════
+// CLIENTES
+// ═══════════════════════════════════════════════
+let clientesFilter = 'todos';
+
+function renderClientes() { renderTabelaClientes(); }
+
+function renderTabelaClientes() {
+  let data = [...DB.clientes];
+  if (clientesFilter !== 'todos') data = data.filter(c => c.status === clientesFilter);
+  const tbody = document.getElementById('tbody-clientes');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhum cliente encontrado.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td style="font-weight:500">${c.nome||'—'}</td>
+      <td style="font-size:12px">${c.empresa||'—'}</td>
+      <td style="font-size:12px">${c.servico||'—'}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td style="font-size:12px;max-width:160px">${c.proxima_acao||'—'}</td>
+      <td style="font-size:12px;color:${isOverdue(c.prazo_entrega)?'var(--ym-danger)':'var(--ym-text-muted)'}">${fmtDate(c.prazo_entrega)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('cliente','${c.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('cliente','${c.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterClientes(f, el) {
+  clientesFilter = f;
+  document.querySelectorAll('#sec-clientes .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaClientes();
+}
+
+// ═══════════════════════════════════════════════
+// SUBTAREFAS
+// ═══════════════════════════════════════════════
+function renderSubtarefas() {
+  populateSelectClientes('sel-cliente-sub');
+  renderTabelaSubtarefas('');
+}
+
+function renderTabelaSubtarefas(cliFilter) {
+  let data = [...DB.subtarefas];
+  if (cliFilter) data = data.filter(s => s.cliente_id === cliFilter);
+  const cli = Object.fromEntries(DB.clientes.map(c => [c.id, c.nome]));
+  const tbody = document.getElementById('tbody-subtarefas');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhuma subtarefa encontrada.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td style="font-size:12px">${cli[s.cliente_id]||'—'}</td>
+      <td style="font-size:12px">${s.tarefa_principal||'—'}</td>
+      <td style="font-weight:500">${s.subtarefa||'—'}</td>
+      <td style="font-size:12px">${s.responsavel||'—'}</td>
+      <td style="font-size:12px;color:${isOverdue(s.prazo)?'var(--ym-danger)':'var(--ym-text-muted)'}">${fmtDate(s.prazo)}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('subtarefa','${s.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('subtarefa','${s.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterSubtarefas(val) { renderTabelaSubtarefas(val); }
+
+// ═══════════════════════════════════════════════
+// ENTREGAS
+// ═══════════════════════════════════════════════
+let entregasFilter = 'todas';
+
+function renderEntregas() {
+  populateSelectClientes('sel-cliente-entrega');
+  renderTabelaEntregas();
+}
+
+function renderTabelaEntregas(cliFilter) {
+  let data = [...DB.entregas];
+  if (entregasFilter !== 'todas') data = data.filter(e => e.status === entregasFilter);
+  if (cliFilter) data = data.filter(e => e.cliente_id === cliFilter);
+  data.sort((a,b) => (a.prazo_entrega||'').localeCompare(b.prazo_entrega||''));
+  const cli = Object.fromEntries(DB.clientes.map(c => [c.id, c.nome]));
+  const tbody = document.getElementById('tbody-entregas');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhuma entrega encontrada.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(e => `
+    <tr>
+      <td style="font-size:12px">${cli[e.cliente_id]||'—'}</td>
+      <td><span class="badge badge-purple">${e.tipo_entrega||'—'}</span></td>
+      <td style="font-size:12px;max-width:180px">${e.descricao||'—'}</td>
+      <td style="font-size:12px;color:${isOverdue(e.prazo_entrega)&&e.status!=='concluida'?'var(--ym-danger)':'var(--ym-text-muted)'}">${fmtDate(e.prazo_entrega)}</td>
+      <td>${prioridadeBadge(e.prioridade)}</td>
+      <td>${statusBadge(e.status)}</td>
+      <td>${e.link_entrega ? `<a href="${e.link_entrega}" target="_blank" style="color:var(--ym-accent);font-size:12px">Abrir</a>` : '—'}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('entrega','${e.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('entrega','${e.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterEntregas(f, el) {
+  entregasFilter = f;
+  document.querySelectorAll('#sec-entregas .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaEntregas();
+}
+function filterEntregasByCliente(v) { renderTabelaEntregas(v); }
+
+// ═══════════════════════════════════════════════
+// PROJETOS
+// ═══════════════════════════════════════════════
+function renderProjetos() {
+  const grid = document.getElementById('grid-projetos');
+  if (!DB.projetos.length) {
+    grid.innerHTML = `<div class="card empty-state"><p>Nenhum projeto cadastrado.</p></div>`;
+    return;
+  }
+  const prioBadge = { 'baixa':'badge-gray','media':'badge-blue','alta':'badge-yellow','urgente':'badge-red' };
+  grid.innerHTML = DB.projetos.map(p => `
+    <div class="card" style="border-left:4px solid var(--ym-accent)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;margin-bottom:4px">${p.nome||'—'}</div>
+          <span class="badge badge-gray">${p.tipo||'—'}</span>
+        </div>
+        <div class="action-btns">
+          <button class="btn btn-sm" onclick="editItem('projeto','${p.id}')">✎</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteItem('projeto','${p.id}')">✕</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--ym-text-muted);margin-bottom:10px">${p.objetivo||'—'}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        ${statusBadge(p.status)} ${prioridadeBadge(p.prioridade)}
+        ${p.prazo ? `<span style="font-size:11px;color:${isOverdue(p.prazo)?'var(--ym-danger)':'var(--ym-text-muted)'}">Prazo: ${fmtDate(p.prazo)}</span>` : ''}
+      </div>
+      ${p.proximas_acoes ? `<div style="font-size:12px;color:var(--ym-text);background:#f8fafc;border-radius:6px;padding:8px"><b>Próximas ações:</b> ${p.proximas_acoes}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// FINANCEIRO
+// ═══════════════════════════════════════════════
+let finFilter = 'todos';
+
+function renderFinanceiro() {
+  const mesAtual = today().slice(0,7);
+  const entradas = DB.financeiro.filter(f => f.tipo==='entrada' && f.data?.slice(0,7)===mesAtual);
+  const saidas = DB.financeiro.filter(f => f.tipo==='saida' && f.data?.slice(0,7)===mesAtual);
+  const recebido = entradas.filter(f => f.status==='recebido'||f.status==='pago').reduce((a,f)=>a+Number(f.valor||0),0);
+  const previsto = entradas.filter(f => f.status==='previsto').reduce((a,f)=>a+Number(f.valor||0),0);
+  const pagar = saidas.filter(f => f.status==='pendente'||f.status==='atrasado').reduce((a,f)=>a+Number(f.valor||0),0);
+  const meta = Number(DB.config.meta_vendas || 0);
+  const pct = meta ? Math.min(100, Math.round(recebido/meta*100)) : 0;
+
+  document.getElementById('meta-financeiro').innerHTML = `
+    <div class="meta-info"><span class="meta-title">Meta de vendas do mês</span><span class="meta-pct">${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ym-text-muted);margin-top:6px">
+      <span>Recebido: ${currencyBR(recebido)}</span>
+      <span>Meta: ${currencyBR(meta)}</span>
+      <span style="color:var(--ym-danger)">Faltam: ${currencyBR(Math.max(0,meta-recebido))}</span>
+    </div>
+  `;
+
+  document.getElementById('stats-fin').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Recebido</div><div class="stat-value" style="font-size:18px;color:var(--ym-success)">${currencyBR(recebido)}</div></div>
+    <div class="stat-card"><div class="stat-label">Previsto</div><div class="stat-value" style="font-size:18px;color:var(--ym-info)">${currencyBR(previsto)}</div></div>
+    <div class="stat-card"><div class="stat-label">A pagar</div><div class="stat-value" style="font-size:18px;color:var(--ym-danger)">${currencyBR(pagar)}</div></div>
+    <div class="stat-card"><div class="stat-label">Saldo líquido</div><div class="stat-value" style="font-size:18px">${currencyBR(recebido - pagar)}</div></div>
+  `;
+
+  renderTabelaFinanceiro();
+}
+
+function renderTabelaFinanceiro() {
+  let data = [...DB.financeiro];
+  if (finFilter === 'entrada') data = data.filter(f => f.tipo==='entrada');
+  else if (finFilter === 'saida') data = data.filter(f => f.tipo==='saida');
+  else if (finFilter === 'pendente') data = data.filter(f => f.status==='pendente');
+  else if (finFilter === 'atrasado') data = data.filter(f => f.status==='atrasado');
+  data.sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  const tbody = document.getElementById('tbody-financeiro');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhum registro encontrado.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(f => `
+    <tr>
+      <td><span class="badge ${f.tipo==='entrada'?'badge-green':'badge-red'}">${f.tipo||'—'}</span></td>
+      <td style="font-weight:500">${f.descricao||'—'}</td>
+      <td style="font-weight:700;color:${f.tipo==='entrada'?'var(--ym-success)':'var(--ym-danger)'}">${f.tipo==='saida'?'-':''}${currencyBR(f.valor)}</td>
+      <td style="font-size:12px">${fmtDate(f.data)}</td>
+      <td style="font-size:12px">${f.categoria||'—'}</td>
+      <td>${statusBadge(f.status)}</td>
+      <td style="font-size:12px">${f.forma||'—'}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('financeiro','${f.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('financeiro','${f.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterFin(f, el) {
+  finFilter = f;
+  document.querySelectorAll('#sec-financeiro .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaFinanceiro();
+}
+
+// ═══════════════════════════════════════════════
+// PLANO FINANCEIRO
+// ═══════════════════════════════════════════════
+function renderPlano() {
+  const data = [...DB.plano].sort((a,b) => {
+    const po = {urgente:0,alta:1,media:2,baixa:3};
+    return (po[a.prioridade]||4) - (po[b.prioridade]||4);
+  });
+  const tbody = document.getElementById('tbody-plano');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhuma ação financeira cadastrada.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td style="font-weight:500;max-width:160px">${p.objetivo||'—'}</td>
+      <td style="font-size:12px;max-width:180px">${p.acao||'—'}</td>
+      <td><span class="badge badge-blue">${p.tipo||'—'}</span></td>
+      <td style="font-weight:600">${p.valor_estimado ? currencyBR(p.valor_estimado) : '—'}</td>
+      <td style="font-size:12px">${fmtDate(p.prazo)}</td>
+      <td>${prioridadeBadge(p.prioridade)}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('plano','${p.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('plano','${p.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// HÁBITOS
+// ═══════════════════════════════════════════════
+function renderHabitos() {
+  const checks = [
+    {key:'exercicio', label:'Exercício'},
+    {key:'alimentacao', label:'Alimentação saudável'},
+    {key:'meditacao', label:'Meditação / Offline'},
+    {key:'alcool_nao', label:'Sem álcool'}
+  ];
+  const habHoje = DB.habitos.find(h => h.data === today()) || {};
+  if (habHoje.agua) document.getElementById('hab-agua').value = habHoje.agua;
+  if (habHoje.peso) document.getElementById('hab-peso').value = habHoje.peso;
+  if (habHoje.calorias) document.getElementById('hab-calorias').value = habHoje.calorias;
+  if (habHoje.obs) document.getElementById('hab-obs').value = habHoje.obs;
+
+  document.getElementById('checklist-habitos').innerHTML = checks.map(c => `
+    <div class="habit-row">
+      <div class="habit-check ${habHoje[c.key]?'done':''}" onclick="toggleHabito('${c.key}',this)">${habHoje[c.key]?'✓':''}</div>
+      <span class="habit-label">${c.label}</span>
+    </div>
+  `).join('');
+
+  const data = [...DB.habitos].sort((a,b) => b.data.localeCompare(a.data)).slice(0,14);
+  const tbody = document.getElementById('tbody-habitos');
+  tbody.innerHTML = data.map(h => `
+    <tr>
+      <td>${fmtDate(h.data)}</td>
+      <td>${h.agua ? h.agua+'L' : '—'}</td>
+      <td>${h.exercicio ? '<span class="badge badge-green">✓</span>' : '<span class="badge badge-gray">—</span>'}</td>
+      <td>${h.alimentacao ? '<span class="badge badge-green">✓</span>' : '<span class="badge badge-gray">—</span>'}</td>
+      <td>${h.peso ? h.peso+'kg' : '—'}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('habito','${h.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('habito','${h.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function toggleHabito(key, el) {
+  let h = DB.habitos.find(h => h.data === today());
+  if (!h) { h = { id: uid(), data: today() }; DB.habitos.push(h); }
+  h[key] = !h[key];
+  el.classList.toggle('done', h[key]);
+  el.textContent = h[key] ? '✓' : '';
+  saveAll();
+}
+
+function salvarHabitoHoje() {
+  let h = DB.habitos.find(h => h.data === today());
+  if (!h) { h = { id: uid(), data: today() }; DB.habitos.push(h); }
+  h.agua = document.getElementById('hab-agua').value;
+  h.peso = document.getElementById('hab-peso').value;
+  h.calorias = document.getElementById('hab-calorias').value;
+  h.obs = document.getElementById('hab-obs').value;
+  saveAll();
+  showToast('Hábitos salvos!');
+  renderHabitos();
+}
+
+// ═══════════════════════════════════════════════
+// CALENDÁRIO
+// ═══════════════════════════════════════════════
+function setCalView(v, el) {
+  calView = v;
+  calOffset = 0;
+  document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cal-nav').style.display = v === 'hoje' ? 'none' : 'flex';
+  renderCalendario();
+}
+
+function calNav(dir) { calOffset += dir; renderCalendario(); }
+
+function renderCalendario() {
+  const content = document.getElementById('cal-content');
+  const label = document.getElementById('cal-label');
+  if (calView === 'hoje') { renderCalHoje(content, label); }
+  else if (calView === 'semana') { renderCalSemana(content, label); }
+  else { renderCalMes(content, label); }
+}
+
+function getCalEvents(dateStr) {
+  const events = [];
+  DB.tarefas.filter(t => t.vencimento === dateStr).forEach(t =>
+    events.push({ label: t.titulo, cls: 'cal-event-task' }));
+  DB.entregas.filter(e => e.prazo_entrega === dateStr).forEach(e =>
+    events.push({ label: e.tipo_entrega, cls: 'cal-event-entrega' }));
+  DB.financeiro.filter(f => f.data === dateStr && (f.status==='pendente'||f.status==='atrasado')).forEach(f =>
+    events.push({ label: f.descricao, cls: 'cal-event-financeiro' }));
+  const h = DB.habitos.find(h => h.data === dateStr);
+  if (h && (h.exercicio || h.alimentacao)) events.push({ label: 'Hábitos', cls: 'cal-event-habito' });
+  return events;
+}
+
+function renderCalHoje(content, label) {
+  const todayStr = today();
+  const now = new Date();
+  label && (label.textContent = now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}));
+  const events = getCalEvents(todayStr);
+  content.innerHTML = `
+    <div class="card">
+      <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:22px;color:var(--ym-navy);margin-bottom:4px">${now.getDate()}</div>
+      <div style="font-size:13px;color:var(--ym-text-muted);margin-bottom:16px">${now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      ${events.length ? events.map(e => `<div class="cal-event ${e.cls}" style="max-width:100%;white-space:normal;margin-bottom:6px;font-size:13px;padding:6px 10px">${e.label}</div>`).join('') : '<p style="color:var(--ym-text-light);font-size:13px">Nenhum evento para hoje.</p>'}
+    </div>
+  `;
+}
+
+function renderCalSemana(content, label) {
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - now.getDay() + 1 + (calOffset * 7));
+  const days = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const cells = Array.from({length:7}, (_,i) => {
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    return d;
+  });
+  label.textContent = `${cells[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} — ${cells[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}`;
+  const todayStr = today();
+  content.innerHTML = `<div class="week-grid">` + cells.map((d, i) => {
+    const ds = d.toISOString().slice(0,10);
+    const isT = ds === todayStr;
+    const events = getCalEvents(ds);
+    return `
+      <div class="week-day ${isT?'today':''}">
+        <div class="week-day-header">${days[i]}</div>
+        <div class="week-day-num">${d.getDate()}</div>
+        ${events.slice(0,4).map(e => `<div class="cal-event ${e.cls}">${e.label}</div>`).join('')}
+        ${events.length > 4 ? `<div style="font-size:10px;color:var(--ym-text-light)">+${events.length-4}</div>` : ''}
+      </div>
+    `;
+  }).join('') + `</div>`;
+}
+
+function renderCalMes(content, label) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+  label.textContent = start.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const daysInMonth = new Date(start.getFullYear(), start.getMonth()+1, 0).getDate();
+  const firstDay = start.getDay();
+  const todayStr = today();
+
+  let cells = '';
+  // Headers
+  cells += days.map(d => `<div style="text-align:center;font-size:11px;font-weight:700;color:var(--ym-text-muted);padding:4px">${d}</div>`).join('');
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) cells += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const events = getCalEvents(ds);
+    const isT = ds === todayStr;
+    cells += `
+      <div class="month-cell ${isT?'today':''}">
+        <div class="month-day-num">${d}</div>
+        ${events.slice(0,2).map(e => `<div class="cal-event ${e.cls}" style="font-size:10px;padding:2px 5px">${e.label}</div>`).join('')}
+        ${events.length > 2 ? `<div style="font-size:10px;color:var(--ym-text-light)">+${events.length-2}</div>` : ''}
+      </div>
+    `;
+  }
+  content.innerHTML = `<div class="month-grid">${cells}</div>`;
+}
+
+// ═══════════════════════════════════════════════
+// IDEIAS RÁPIDAS
+// ═══════════════════════════════════════════════
+let ideiasFilter = 'todas';
+
+function renderIdeias() { renderTabelaIdeias(); }
+
+function renderTabelaIdeias() {
+  let data = [...DB.ideias];
+  if (ideiasFilter !== 'todas') data = data.filter(i => i.tipo === ideiasFilter);
+  data.sort((a,b) => (b.criado_em||'').localeCompare(a.criado_em||''));
+  const tbody = document.getElementById('tbody-ideias');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhuma ideia registrada.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(i => `
+    <tr>
+      <td><span class="badge badge-blue">${i.tipo||'—'}</span></td>
+      <td style="font-weight:500;max-width:240px">${i.conteudo||'—'}</td>
+      <td style="font-size:12px">${i.area||'—'}</td>
+      <td>${prioridadeBadge(i.prioridade)}</td>
+      <td style="font-size:12px">${fmtDate(i.criado_em)}</td>
+      <td>${statusBadge(i.status)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('ideia','${i.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('ideia','${i.id}')">✕</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterIdeias(f, el) {
+  ideiasFilter = f;
+  document.querySelectorAll('#sec-ideias .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaIdeias();
+}
+
+// ═══════════════════════════════════════════════
+// CONFIGURAÇÕES
+// ═══════════════════════════════════════════════
+function renderConfig() {
+  const lists = ['STATUS_TAREFAS','STATUS_CLIENTES','STATUS_FINANCEIRO','PRIORIDADES','AREAS','TIPOS_ENTREGA'];
+  const labels = {
+    STATUS_TAREFAS:'Status de Tarefas', STATUS_CLIENTES:'Status de Clientes',
+    STATUS_FINANCEIRO:'Status Financeiro', PRIORIDADES:'Prioridades',
+    AREAS:'Áreas', TIPOS_ENTREGA:'Tipos de Entrega'
+  };
+  const grid = document.getElementById('config-grid');
+  grid.innerHTML = `
+    <div class="config-section" style="grid-column:1/-1">
+      <h3>Configurações gerais</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Seu nome</label>
+          <input type="text" id="cfg-nome" value="${DB.config.nome_usuario||''}" placeholder="YM">
+        </div>
+        <div class="form-group">
+          <label>Meta de vendas mensal (R$)</label>
+          <input type="number" id="cfg-meta" value="${DB.config.meta_vendas||5000}" placeholder="5000">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="salvarConfigGeral()">Salvar configurações</button>
+    </div>
+    ${lists.map(key => `
+      <div class="config-section">
+        <h3>${labels[key]}</h3>
+        <div class="tag-list" id="tags-${key}"></div>
+        <div class="tag-add-row">
+          <input type="text" id="input-${key}" placeholder="Novo valor..." onkeydown="if(event.key==='Enter') addTag('${key}')">
+          <button class="btn btn-primary btn-sm" onclick="addTag('${key}')">+</button>
+        </div>
+      </div>
+    `).join('')}
+  `;
+  lists.forEach(key => renderTags(key));
+}
+
+function renderTags(key) {
+  const container = document.getElementById('tags-' + key);
+  if (!container) return;
+  container.innerHTML = (DB.config[key] || []).map((v, i) => `
+    <div class="tag-item">
+      ${v}
+      <button class="tag-remove" onclick="removeTag('${key}', ${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addTag(key) {
+  const inp = document.getElementById('input-' + key);
+  const val = inp.value.trim();
+  if (!val) return;
+  if (!DB.config[key]) DB.config[key] = [];
+  DB.config[key].push(val);
+  inp.value = '';
+  saveAll();
+  renderTags(key);
+  showToast('Adicionado!');
+}
+
+function removeTag(key, idx) {
+  DB.config[key].splice(idx, 1);
+  saveAll();
+  renderTags(key);
+}
+
+function salvarConfigGeral() {
+  DB.config.nome_usuario = document.getElementById('cfg-nome').value;
+  DB.config.meta_vendas = Number(document.getElementById('cfg-meta').value);
+  saveAll();
+  showToast('Configurações salvas!');
+}
+
+function saveConfig(key, val) {
+  DB.config[key] = val;
+  saveAll();
+}
+
+// ═══════════════════════════════════════════════
+// MODAL — FORMULÁRIOS
+// ═══════════════════════════════════════════════
+function openModal(type, id) {
+  modalType = type;
+  editId = id || null;
+  const overlay = document.getElementById('modal-overlay');
+  const titles = {
+    tarefa:'Tarefa', cliente:'Cliente', subtarefa:'Subtarefa',
+    entrega:'Entrega', projeto:'Projeto', financeiro:'Financeiro',
+    plano:'Ação financeira', habito:'Registro de hábito', ideia:'Ideia / Captura',
+    captura:'Captura rápida'
+  };
+  document.getElementById('modal-title').textContent = (id ? 'Editar ' : 'Nova ') + (titles[type] || type);
+  document.getElementById('modal-body').innerHTML = getFormHtml(type, id);
+  overlay.classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalType = null; editId = null;
+}
+
+function getCliOpts() {
+  return DB.clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+}
+function getOpts(arr) { return arr.map(v => `<option value="${v}">${v}</option>`).join(''); }
+
+function getFormHtml(type, id) {
+  const rec = id ? (DB[pluralMap(type)] || []).find(r => r.id === id) || {} : {};
+  const v = (k, def='') => rec[k] !== undefined ? rec[k] : def;
+  const sel = (k, opts, def='') => `<select name="${k}">${opts.map(o => `<option value="${o}" ${v(k,def)===o?'selected':''}>${o}</option>`).join('')}</select>`;
+
+  if (type === 'tarefa') return `<div class="form-grid">
+    <div class="form-group full"><label>Título *</label><input name="titulo" value="${v('titulo')}" placeholder="Descreva a tarefa..." required></div>
+    <div class="form-group"><label>Área</label>${sel('area', DB.config.AREAS)}</div>
+    <div class="form-group"><label>Cliente / Projeto</label><select name="cliente_id"><option value="">—</option>${getCliOpts()}</select></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade', DB.config.PRIORIDADES, 'media')}</div>
+    <div class="form-group"><label>Status</label>${sel('status', DB.config.STATUS_TAREFAS, 'pendente')}</div>
+    <div class="form-group"><label>Vencimento</label><input type="date" name="vencimento" value="${v('vencimento')}"></div>
+    <div class="form-group"><label>Link</label><input name="link" type="url" value="${v('link')}" placeholder="https://..."></div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+
+  if (type === 'cliente') return `<div class="form-grid">
+    <div class="form-group full"><label>Nome *</label><input name="nome" value="${v('nome')}" required></div>
+    <div class="form-group"><label>Empresa / Marca</label><input name="empresa" value="${v('empresa')}"></div>
+    <div class="form-group"><label>Serviço contratado</label><input name="servico" value="${v('servico')}"></div>
+    <div class="form-group"><label>Status</label>${sel('status', DB.config.STATUS_CLIENTES, 'ativo')}</div>
+    <div class="form-group"><label>WhatsApp</label><input name="whatsapp" value="${v('whatsapp')}" placeholder="(11) 9..."></div>
+    <div class="form-group"><label>Instagram</label><input name="instagram" value="${v('instagram')}" placeholder="@..."></div>
+    <div class="form-group full"><label>E-mail</label><input name="email" type="email" value="${v('email')}"></div>
+    <div class="form-group"><label>Próxima ação</label><input name="proxima_acao" value="${v('proxima_acao')}"></div>
+    <div class="form-group"><label>Prazo da próxima entrega</label><input type="date" name="prazo_entrega" value="${v('prazo_entrega')}"></div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+
+  if (type === 'subtarefa') return `<div class="form-grid">
+    <div class="form-group full"><label>Cliente *</label><select name="cliente_id"><option value="">Selecione...</option>${getCliOpts()}</select></div>
+    <div class="form-group full"><label>Tarefa principal</label><input name="tarefa_principal" value="${v('tarefa_principal')}"></div>
+    <div class="form-group full"><label>Subtarefa *</label><input name="subtarefa" value="${v('subtarefa')}" required></div>
+    <div class="form-group"><label>Responsável</label><input name="responsavel" value="${v('responsavel')}"></div>
+    <div class="form-group"><label>Prazo</label><input type="date" name="prazo" value="${v('prazo')}"></div>
+    <div class="form-group full"><label>Status</label>${sel('status', DB.config.STATUS_TAREFAS, 'pendente')}</div>
+    <div class="form-group full"><label>Observação</label><textarea name="observacao">${v('observacao')}</textarea></div>
+  </div>`;
+
+  if (type === 'entrega') return `<div class="form-grid">
+    <div class="form-group full"><label>Cliente *</label><select name="cliente_id"><option value="">Selecione...</option>${getCliOpts()}</select></div>
+    <div class="form-group"><label>Tipo de entrega</label><select name="tipo_entrega"><option value="">Selecione...</option>${getOpts(DB.config.TIPOS_ENTREGA)}</select></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade', DB.config.PRIORIDADES, 'media')}</div>
+    <div class="form-group"><label>Data de início</label><input type="date" name="data_inicio" value="${v('data_inicio')}"></div>
+    <div class="form-group"><label>Prazo de entrega</label><input type="date" name="prazo_entrega" value="${v('prazo_entrega')}"></div>
+    <div class="form-group"><label>Status</label>${sel('status', DB.config.STATUS_TAREFAS, 'pendente')}</div>
+    <div class="form-group full"><label>Descrição</label><textarea name="descricao">${v('descricao')}</textarea></div>
+    <div class="form-group full"><label>Link da entrega</label><input name="link_entrega" type="url" value="${v('link_entrega')}" placeholder="https://drive.google.com/..."></div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+
+  if (type === 'projeto') return `<div class="form-grid">
+    <div class="form-group full"><label>Nome do projeto *</label><input name="nome" value="${v('nome')}" required></div>
+    <div class="form-group full"><label>Objetivo</label><textarea name="objetivo">${v('objetivo')}</textarea></div>
+    <div class="form-group"><label>Tipo / Área</label>${sel('tipo', DB.config.AREAS, 'YM')}</div>
+    <div class="form-group"><label>Status</label>${sel('status', DB.config.STATUS_TAREFAS, 'em andamento')}</div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade', DB.config.PRIORIDADES, 'media')}</div>
+    <div class="form-group"><label>Prazo</label><input type="date" name="prazo" value="${v('prazo')}"></div>
+    <div class="form-group full"><label>Próximas ações</label><textarea name="proximas_acoes">${v('proximas_acoes')}</textarea></div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+
+  if (type === 'financeiro') return `<div class="form-grid">
+    <div class="form-group"><label>Tipo *</label><select name="tipo"><option value="entrada" ${v('tipo')==='entrada'?'selected':''}>Entrada</option><option value="saida" ${v('tipo')==='saida'?'selected':''}>Saída</option></select></div>
+    <div class="form-group"><label>Valor *</label><input name="valor" type="number" step="0.01" value="${v('valor')}" required></div>
+    <div class="form-group full"><label>Descrição *</label><input name="descricao" value="${v('descricao')}" required></div>
+    <div class="form-group"><label>Data</label><input type="date" name="data" value="${v('data', today())}"></div>
+    <div class="form-group"><label>Categoria</label><input name="categoria" value="${v('categoria')}" placeholder="ex: Clientes, Ferramentas..."></div>
+    <div class="form-group"><label>Status</label>${sel('status', DB.config.STATUS_FINANCEIRO, 'previsto')}</div>
+    <div class="form-group"><label>Forma de pagamento</label><input name="forma" value="${v('forma')}" placeholder="Pix, TED, Boleto..."></div>
+    <div class="form-group full"><label>Observação</label><textarea name="observacao">${v('observacao')}</textarea></div>
+  </div>`;
+
+  if (type === 'plano') return `<div class="form-grid">
+    <div class="form-group full"><label>Objetivo *</label><input name="objetivo" value="${v('objetivo')}" required placeholder="ex: Bater meta de R$5k"></div>
+    <div class="form-group full"><label>Ação *</label><input name="acao" value="${v('acao')}" placeholder="ex: Enviar proposta para cliente X"></div>
+    <div class="form-group"><label>Tipo</label><select name="tipo"><option>receita</option><option>cobrança</option><option>proposta</option><option>pagamento</option><option>outro</option></select></div>
+    <div class="form-group"><label>Valor estimado</label><input name="valor_estimado" type="number" step="0.01" value="${v('valor_estimado')}"></div>
+    <div class="form-group"><label>Prazo</label><input type="date" name="prazo" value="${v('prazo')}"></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade', DB.config.PRIORIDADES, 'alta')}</div>
+    <div class="form-group full"><label>Status</label>${sel('status', DB.config.STATUS_TAREFAS, 'pendente')}</div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+
+  if (type === 'habito') return `<div class="form-grid">
+    <div class="form-group full"><label>Data</label><input type="date" name="data" value="${v('data', today())}"></div>
+    <div class="form-group"><label>Água (litros)</label><input name="agua" type="number" step="0.5" value="${v('agua')}" placeholder="2.0"></div>
+    <div class="form-group"><label>Peso (kg)</label><input name="peso" type="number" step="0.1" value="${v('peso')}"></div>
+    <div class="form-group"><label>Calorias aprox.</label><input name="calorias" type="number" value="${v('calorias')}"></div>
+    <div class="form-group"><label>Exercício</label><select name="exercicio"><option value="">—</option><option value="1" ${v('exercicio')==='1'?'selected':''}>Sim</option><option value="0" ${v('exercicio')==='0'?'selected':''}>Não</option></select></div>
+    <div class="form-group"><label>Alimentação saudável</label><select name="alimentacao"><option value="">—</option><option value="1" ${v('alimentacao')==='1'?'selected':''}>Sim</option><option value="0">Não</option></select></div>
+    <div class="form-group"><label>Meditação / Offline</label><select name="meditacao"><option value="">—</option><option value="1" ${v('meditacao')==='1'?'selected':''}>Sim</option><option value="0">Não</option></select></div>
+    <div class="form-group"><label>Sem álcool</label><select name="alcool_nao"><option value="">—</option><option value="1" ${v('alcool_nao')==='1'?'selected':''}>Sim</option><option value="0">Não</option></select></div>
+    <div class="form-group full"><label>Observação do dia</label><textarea name="obs">${v('obs')}</textarea></div>
+  </div>`;
+
+  if (type === 'ideia' || type === 'captura') return `<div class="form-grid">
+    <div class="form-group"><label>Tipo</label><select name="tipo"><option>ideia</option><option>tarefa</option><option>compra</option><option>cliente</option><option>pendencia</option><option>conta</option><option>lembrete</option></select></div>
+    <div class="form-group"><label>Área</label>${sel('area', DB.config.AREAS)}</div>
+    <div class="form-group full"><label>Conteúdo *</label><textarea name="conteudo" rows="3" required>${v('conteudo')}</textarea></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade', DB.config.PRIORIDADES, 'media')}</div>
+    <div class="form-group"><label>Status</label><select name="status"><option>novo</option><option>processado</option><option>descartado</option></select></div>
+  </div>`;
+
+  return '<p style="color:var(--ym-text-muted)">Formulário não encontrado.</p>';
+}
+
+function pluralMap(type) {
+  const map = {
+    tarefa:'tarefas', cliente:'clientes', subtarefa:'subtarefas', entrega:'entregas',
+    projeto:'projetos', financeiro:'financeiro', plano:'plano', habito:'habitos',
+    ideia:'ideias', captura:'ideias'
+  };
+  return map[type];
+}
+
+function salvarModal() {
+  const body = document.getElementById('modal-body');
+  const inputs = body.querySelectorAll('input,select,textarea');
+  const data = {};
+  inputs.forEach(inp => { if (inp.name) data[inp.name] = inp.value; });
+
+  const arr = DB[pluralMap(modalType)];
+  if (!arr) { closeModal(); return; }
+
+  if (editId) {
+    const idx = arr.findIndex(r => r.id === editId);
+    if (idx >= 0) Object.assign(arr[idx], data);
+  } else {
+    const rec = { id: uid(), criado_em: today(), ...data };
+    arr.push(rec);
+  }
+
+  saveAll();
+  closeModal();
+  showToast(editId ? 'Registro atualizado!' : 'Registro salvo!');
+
+  // Re-render current section
+  const active = document.querySelector('.section.active');
+  if (active) renderSection(active.id.replace('sec-',''));
+}
+
+function editItem(type, id) { openModal(type, id); }
+
+function deleteItem(type, id) {
+  if (!confirm('Excluir este registro?')) return;
+  const arr = DB[pluralMap(type)];
+  if (!arr) return;
+  const idx = arr.findIndex(r => r.id === id);
+  if (idx >= 0) arr.splice(idx, 1);
+  saveAll();
+  showToast('Registro excluído.');
+  const active = document.querySelector('.section.active');
+  if (active) renderSection(active.id.replace('sec-',''));
+}
+
+function openCaptura() { openModal('captura'); }
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function populateSelect(id, opts, label) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = `<option value="">${label}</option>` + opts.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
+function populateSelectClientes(id) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = `<option value="">Todos os clientes</option>` + DB.clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// HEADER DATE
+// ═══════════════════════════════════════════════
+function updateHeaderDate() {
+  const now = new Date();
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'short', year:'numeric'}).replace(/^\w/, c => c.toUpperCase());
+}
+
+// ═══════════════════════════════════════════════
+// SAMPLE DATA (first run)
+// ═══════════════════════════════════════════════
+function loadSampleData() {
+  const cliId1 = uid(); const cliId2 = uid(); const cliId3 = uid();
+  DB.clientes = [
+    { id: cliId1, nome: 'Estúdio Mover Pilates', empresa: 'Mover Pilates', servico: 'Gestão de redes sociais', status: 'ativo', whatsapp: '(31) 99000-0001', proxima_acao: 'Enviar calendário editorial', prazo_entrega: today(), criado_em: today() },
+    { id: cliId2, nome: 'Clínica Renovar', empresa: 'Renovar Estética', servico: 'Diagnóstico + Proposta', status: 'lead', proxima_acao: 'Agendar reunião', criado_em: today() },
+    { id: cliId3, nome: 'Boutique Elara', empresa: 'Elara Moda', servico: 'Consultoria mensal', status: 'em execucao', proxima_acao: 'Revisar estratégia', criado_em: today() }
+  ];
+
+  const t1 = today();
+  const t2 = new Date(); t2.setDate(t2.getDate()+3); const fut = t2.toISOString().slice(0,10);
+  const t3 = new Date(); t3.setDate(t3.getDate()-2); const past = t3.toISOString().slice(0,10);
+
+  DB.tarefas = [
+    { id: uid(), titulo: 'Criar calendário editorial Mover Pilates', area: 'CLIENTE', cliente_id: cliId1, prioridade: 'alta', status: 'em andamento', vencimento: t1, criado_em: t1 },
+    { id: uid(), titulo: 'Gravar vídeo de apresentação YM', area: 'YM', prioridade: 'media', status: 'pendente', vencimento: fut, criado_em: t1 },
+    { id: uid(), titulo: 'Enviar proposta para Clínica Renovar', area: 'CLIENTE', cliente_id: cliId2, prioridade: 'urgente', status: 'pendente', vencimento: past, criado_em: t1 },
+    { id: uid(), titulo: 'Registrar hábitos da semana', area: 'SAUDE', prioridade: 'baixa', status: 'pendente', vencimento: t1, criado_em: t1 }
+  ];
+
+  DB.entregas = [
+    { id: uid(), cliente_id: cliId1, tipo_entrega: 'Calendário Editorial', descricao: 'Calendário para julho', data_inicio: t1, prazo_entrega: t1, status: 'em andamento', prioridade: 'alta', criado_em: t1 },
+    { id: uid(), cliente_id: cliId2, tipo_entrega: 'Diagnóstico', descricao: 'Diagnóstico de marketing', prazo_entrega: fut, status: 'pendente', prioridade: 'alta', criado_em: t1 },
+    { id: uid(), cliente_id: cliId3, tipo_entrega: 'Raio-X Estratégico', descricao: 'Análise completa da presença digital', prazo_entrega: fut, status: 'pendente', prioridade: 'media', criado_em: t1 }
+  ];
+
+  DB.financeiro = [
+    { id: uid(), tipo: 'entrada', descricao: 'Mensalidade Mover Pilates', valor: 1200, data: t1, categoria: 'Clientes', status: 'recebido', forma: 'Pix' },
+    { id: uid(), tipo: 'entrada', descricao: 'Mensalidade Boutique Elara', valor: 900, data: t1, categoria: 'Clientes', status: 'previsto', forma: 'Pix' },
+    { id: uid(), tipo: 'saida', descricao: 'Ferramentas de marketing', valor: 250, data: t1, categoria: 'Ferramentas', status: 'pago', forma: 'Cartão' },
+    { id: uid(), tipo: 'saida', descricao: 'Conta de internet', valor: 120, data: fut, categoria: 'Estrutura', status: 'pendente', forma: 'Débito' }
+  ];
+
+  DB.plano = [
+    { id: uid(), objetivo: 'Bater meta de R$ 5.000', acao: 'Fechar contrato com Clínica Renovar', tipo: 'receita', valor_estimado: 1500, prazo: fut, prioridade: 'urgente', status: 'pendente' },
+    { id: uid(), objetivo: 'Cobrar clientes em atraso', acao: 'Enviar cobrança via WhatsApp para Elara', tipo: 'cobrança', valor_estimado: 900, prazo: t1, prioridade: 'alta', status: 'pendente' }
+  ];
+
+  DB.projetos = [
+    { id: uid(), nome: 'YM Marketing & Negócios', objetivo: 'Crescer a base de clientes para 10 ativos', tipo: 'YM', status: 'em andamento', prioridade: 'alta', proximas_acoes: 'Gravar conteúdo, fechar 2 novos contratos', prazo: fut },
+    { id: uid(), nome: 'Menos Bucho', objetivo: 'Lançar desafio de 30 dias', tipo: 'PESSOAL', status: 'pendente', prioridade: 'media', proximas_acoes: 'Criar landing page, definir cronograma', prazo: fut },
+    { id: uid(), nome: 'Sunshine Oráculos', objetivo: 'Estruturar precificação e catálogo', tipo: 'PESSOAL', status: 'pendente', prioridade: 'baixa', proximas_acoes: 'Listar produtos, definir preços' }
+  ];
+
+  DB.habitos = [
+    { id: uid(), data: today(), exercicio: true, alimentacao: true, meditacao: false, alcool_nao: true, agua: 2, peso: 0, calorias: 1800, obs: 'Bom dia de foco!' }
+  ];
+
+  DB.ideias = [
+    { id: uid(), tipo: 'ideia', conteudo: 'Criar conteúdo sobre bastidores da consultoria para o Instagram', area: 'YM', prioridade: 'media', status: 'novo', criado_em: today() },
+    { id: uid(), tipo: 'pendencia', conteudo: 'Renovar domínio do site YM', area: 'YM', prioridade: 'alta', status: 'novo', criado_em: today() }
+  ];
+
+  saveAll();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function init() {
+  loadAll();
+  if (!DB.tarefas.length && !DB.clientes.length) loadSampleData();
+  updateHeaderDate();
+  renderDashboard();
+
+  // Populate config select on sheets page
+  const shUrl = document.getElementById('sheets-url');
+  if (shUrl) shUrl.value = DB.config.sheets_url || '';
+
+  // Keyboard shortcut: N = nova captura
+  document.addEventListener('keydown', e => {
+    if (e.key === 'n' && !['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) openCaptura();
+    if (e.key === 'Escape') closeModal();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
