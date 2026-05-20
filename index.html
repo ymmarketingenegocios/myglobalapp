@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a1628">
 <title>YM Command Center</title>
-<link rel="manifest" href="#" />
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -620,6 +622,28 @@ textarea { resize: vertical; min-height: 70px; }
 
 /* ─── ACTION MENU ─── */
 .action-btns { display: flex; gap: 4px; }
+
+/* ─── CLICKABLE CARD ─── */
+.card-link { cursor: pointer; transition: box-shadow 0.15s, transform 0.15s; }
+.card-link:hover { box-shadow: 0 4px 16px rgba(37,99,235,0.12); transform: translateY(-1px); }
+
+/* ─── FINANCE TABS ─── */
+.fin-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.fin-tab {
+  padding: 7px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--ym-border); background: var(--ym-surface);
+  font-size: 13px; font-weight: 500; cursor: pointer; color: var(--ym-text-muted);
+  transition: all 0.15s; white-space: nowrap;
+}
+.fin-tab:hover { border-color: var(--ym-accent); color: var(--ym-accent); }
+.fin-tab.active { background: var(--ym-navy); color: #fff; border-color: var(--ym-navy); }
+.fin-tab.pessoal.active { background: #7c3aed; border-color: #7c3aed; }
+.fin-tab.empresa.active { background: #0284c7; border-color: #0284c7; }
+.fin-tab.plano-p.active { background: #d97706; border-color: #d97706; }
+.fin-tab.plano-e.active { background: #16a34a; border-color: #16a34a; }
+
+/* ─── PROJECT SUBTASK AREA ─── */
+.proj-detail { background:#f8fafc; border-radius:var(--radius-sm); padding:12px 14px; margin-top:12px; border:1px solid var(--ym-border); }
 </style>
 </head>
 <body>
@@ -649,10 +673,13 @@ textarea { resize: vertical; min-height: 70px; }
 
       <div class="nav-section">Projetos</div>
       <div class="nav-item" onclick="showSection('projetos')"><span class="icon">◧</span> Projetos</div>
+      <div class="nav-item" onclick="showSection('subtarefas-proj')"><span class="icon">◈</span> Subtarefas</div>
 
       <div class="nav-section">Finanças</div>
-      <div class="nav-item" onclick="showSection('financeiro')"><span class="icon">◊</span> Financeiro</div>
-      <div class="nav-item" onclick="showSection('plano')"><span class="icon">▷</span> Plano Financeiro</div>
+      <div class="nav-item" onclick="showSection('fin-pessoal')"><span class="icon">◊</span> Financeiro Pessoal</div>
+      <div class="nav-item" onclick="showSection('fin-empresa')"><span class="icon">◊</span> Financeiro Empresa</div>
+      <div class="nav-item" onclick="showSection('plano-pessoal')"><span class="icon">▷</span> Plano Pessoal</div>
+      <div class="nav-item" onclick="showSection('plano-empresa')"><span class="icon">▷</span> Plano Empresa</div>
 
       <div class="nav-section">Bem-estar</div>
       <div class="nav-item" onclick="showSection('habitos')"><span class="icon">◎</span> Hábitos</div>
@@ -678,22 +705,51 @@ textarea { resize: vertical; min-height: 70px; }
 
       <div class="grid-4" id="dash-stats" style="margin-bottom:20px"></div>
 
-      <div class="grid-2">
-        <div class="card">
+      <!-- new order: hábitos, rotina, tarefas, entregas, clientes, projetos, ideias, financeiro, plano -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="grid-2">
+          <div class="card card-link" onclick="showSection('habitos')">
+            <div class="card-title"><span class="icon">◎</span> Hábitos de hoje</div>
+            <div id="dash-habitos"></div>
+          </div>
+          <div class="card card-link" onclick="showSection('tarefas')">
+            <div class="card-title"><span class="icon">◫</span> Rotina / compromissos</div>
+            <div id="dash-rotina"></div>
+          </div>
+        </div>
+        <div class="card card-link" onclick="showSection('tarefas')">
           <div class="card-title"><span class="icon">✓</span> Tarefas de hoje</div>
           <div id="dash-tarefas-hoje"></div>
         </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">◪</span> Entregas em aberto</div>
-          <div id="dash-entregas"></div>
+        <div class="grid-2">
+          <div class="card card-link" onclick="showSection('entregas')">
+            <div class="card-title"><span class="icon">◪</span> Entregas em aberto</div>
+            <div id="dash-entregas"></div>
+          </div>
+          <div class="card card-link" onclick="showSection('clientes')">
+            <div class="card-title"><span class="icon">◉</span> Clientes ativos</div>
+            <div id="dash-clientes"></div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">◊</span> Financeiro do mês</div>
-          <div id="dash-financeiro"></div>
+        <div class="grid-2">
+          <div class="card card-link" onclick="showSection('projetos')">
+            <div class="card-title"><span class="icon">◧</span> Projetos em andamento</div>
+            <div id="dash-projetos"></div>
+          </div>
+          <div class="card card-link" onclick="showSection('ideias')">
+            <div class="card-title"><span class="icon">◌</span> Ideias rápidas</div>
+            <div id="dash-ideias"></div>
+          </div>
         </div>
-        <div class="card">
-          <div class="card-title"><span class="icon">◎</span> Hábitos de hoje</div>
-          <div id="dash-habitos"></div>
+        <div class="grid-2">
+          <div class="card card-link" onclick="showSection('fin-empresa')">
+            <div class="card-title"><span class="icon">◊</span> Financeiro do mês</div>
+            <div id="dash-financeiro"></div>
+          </div>
+          <div class="card card-link" onclick="showSection('plano-empresa')">
+            <div class="card-title"><span class="icon">▷</span> Plano financeiro</div>
+            <div id="dash-plano"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -815,51 +871,85 @@ textarea { resize: vertical; min-height: 70px; }
       <div id="grid-projetos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
     </section>
 
-    <!-- ═══ FINANCEIRO ═══ -->
-    <section id="sec-financeiro" class="section">
+    <!-- ═══ FINANCEIRO PESSOAL ═══ -->
+    <section id="sec-fin-pessoal" class="section">
       <div class="toolbar">
-        <h2>Financeiro</h2>
-        <button class="btn btn-primary" onclick="openModal('financeiro')">+ Novo registro</button>
+        <h2>Financeiro Pessoal</h2>
+        <button class="btn btn-primary" onclick="openModal('fin-pessoal')">+ Novo registro</button>
       </div>
-      <div id="meta-financeiro" class="meta-bar"></div>
-      <div class="grid-4" id="stats-fin" style="margin-bottom:16px"></div>
-      <div class="filters">
-        <span class="filter-chip active" onclick="filterFin('todos',this)">Todos</span>
-        <span class="filter-chip" onclick="filterFin('entrada',this)">Entradas</span>
-        <span class="filter-chip" onclick="filterFin('saida',this)">Saídas</span>
-        <span class="filter-chip" onclick="filterFin('pendente',this)">Pendentes</span>
-        <span class="filter-chip" onclick="filterFin('atrasado',this)">Atrasados</span>
+      <div class="grid-4" id="stats-fin-pessoal" style="margin-bottom:16px"></div>
+      <div class="filters" id="filtros-fin-pessoal">
+        <span class="filter-chip active" onclick="filterFinSub('pessoal','todos',this)">Todos</span>
+        <span class="filter-chip" onclick="filterFinSub('pessoal','entrada',this)">Entradas</span>
+        <span class="filter-chip" onclick="filterFinSub('pessoal','saida',this)">Saídas</span>
+        <span class="filter-chip" onclick="filterFinSub('pessoal','pendente',this)">Pendentes</span>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th>
-              <th>Categoria</th><th>Status</th><th>Forma</th><th>Ações</th>
-            </tr></thead>
-            <tbody id="tbody-financeiro"></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Categoria</th><th>Status</th><th>Forma</th><th>Ações</th></tr></thead>
+        <tbody id="tbody-fin-pessoal"></tbody></table>
+      </div></div>
     </section>
 
-    <!-- ═══ PLANO FINANCEIRO ═══ -->
-    <section id="sec-plano" class="section">
+    <!-- ═══ FINANCEIRO EMPRESA ═══ -->
+    <section id="sec-fin-empresa" class="section">
       <div class="toolbar">
-        <h2>Plano Financeiro</h2>
-        <button class="btn btn-primary" onclick="openModal('plano')">+ Nova ação</button>
+        <h2>Financeiro Empresa</h2>
+        <button class="btn btn-primary" onclick="openModal('fin-empresa')">+ Novo registro</button>
       </div>
-      <div class="card">
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>Objetivo</th><th>Ação</th><th>Tipo</th>
-              <th>Valor estimado</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th>
-            </tr></thead>
-            <tbody id="tbody-plano"></tbody>
-          </table>
-        </div>
+      <div id="meta-financeiro" class="meta-bar"></div>
+      <div class="grid-4" id="stats-fin-empresa" style="margin-bottom:16px"></div>
+      <div class="filters" id="filtros-fin-empresa">
+        <span class="filter-chip active" onclick="filterFinSub('empresa','todos',this)">Todos</span>
+        <span class="filter-chip" onclick="filterFinSub('empresa','entrada',this)">Receitas</span>
+        <span class="filter-chip" onclick="filterFinSub('empresa','saida',this)">Custos</span>
+        <span class="filter-chip" onclick="filterFinSub('empresa','pendente',this)">Pendentes</span>
+        <span class="filter-chip" onclick="filterFinSub('empresa','atrasado',this)">Atrasados</span>
       </div>
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Categoria</th><th>Origem</th><th>Status</th><th>Margem</th><th>Ações</th></tr></thead>
+        <tbody id="tbody-fin-empresa"></tbody></table>
+      </div></div>
+    </section>
+
+    <!-- ═══ PLANO FINANCEIRO PESSOAL ═══ -->
+    <section id="sec-plano-pessoal" class="section">
+      <div class="toolbar">
+        <h2>Plano Financeiro Pessoal</h2>
+        <button class="btn btn-primary" onclick="openModal('plano-pessoal')">+ Nova ação</button>
+      </div>
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Objetivo</th><th>Ação</th><th>Valor est.</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="tbody-plano-pessoal"></tbody></table>
+      </div></div>
+    </section>
+
+    <!-- ═══ PLANO FINANCEIRO EMPRESA ═══ -->
+    <section id="sec-plano-empresa" class="section">
+      <div class="toolbar">
+        <h2>Plano Financeiro Empresa</h2>
+        <button class="btn btn-primary" onclick="openModal('plano-empresa')">+ Nova ação</button>
+      </div>
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Objetivo</th><th>Ação</th><th>Valor est.</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="tbody-plano-empresa"></tbody></table>
+      </div></div>
+    </section>
+
+    <!-- ═══ SUBTAREFAS DE PROJETOS ═══ -->
+    <section id="sec-subtarefas-proj" class="section">
+      <div class="toolbar">
+        <h2>Subtarefas de Projetos</h2>
+        <button class="btn btn-primary" onclick="openModal('subtarefa-proj')">+ Nova subtarefa</button>
+      </div>
+      <div class="filters">
+        <select class="filter-select" onchange="filterSubProj(this.value)" id="sel-projeto-sub">
+          <option value="">Todos os projetos</option>
+        </select>
+      </div>
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Projeto</th><th>Tarefa principal</th><th>Subtarefa</th><th>Responsável</th><th>Prazo</th><th>Prioridade</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody id="tbody-subtarefas-proj"></tbody></table>
+      </div></div>
     </section>
 
     <!-- ═══ HÁBITOS ═══ -->
@@ -1021,6 +1111,8 @@ textarea { resize: vertical; min-height: 70px; }
 const DB = {
   tarefas: [], clientes: [], subtarefas: [], entregas: [],
   projetos: [], financeiro: [], plano: [], habitos: [], ideias: [],
+  finPessoal: [], finEmpresa: [], planoPessoal: [], planoEmpresa: [],
+  subtarefasProj: [],
   config: {
     sheets_url: '',
     STATUS_TAREFAS: ['pendente','em andamento','aguardando retorno','concluida','atrasada','cancelada'],
@@ -1139,10 +1231,15 @@ function renderSection(id) {
     tarefas: renderTarefas,
     clientes: renderClientes,
     subtarefas: renderSubtarefas,
+    'subtarefas-proj': renderSubtarefasProj,
     entregas: renderEntregas,
     projetos: renderProjetos,
-    financeiro: renderFinanceiro,
-    plano: renderPlano,
+    'fin-pessoal': renderFinPessoal,
+    'fin-empresa': renderFinEmpresa,
+    'plano-pessoal': () => renderPlanoSub('pessoal'),
+    'plano-empresa': () => renderPlanoSub('empresa'),
+    financeiro: renderFinEmpresa,
+    plano: () => renderPlanoSub('empresa'),
     habitos: renderHabitos,
     calendario: renderCalendario,
     ideias: renderIdeias,
@@ -1169,113 +1266,175 @@ function renderDashboard() {
   const greeting = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   document.getElementById('dash-title').textContent = `${greeting}, ${DB.config.nome_usuario || 'YM'}!`;
 
+  const todayStr = today();
   const tarefasHoje = DB.tarefas.filter(t => isToday(t.vencimento) && t.status !== 'concluida');
   const atrasadas = DB.tarefas.filter(t => isOverdue(t.vencimento) && t.status !== 'concluida');
   const entregasAbertas = DB.entregas.filter(e => e.status !== 'concluida' && e.status !== 'cancelada');
-  const recebido = DB.financeiro.filter(f => f.tipo === 'entrada' && (f.status === 'recebido' || f.status === 'pago') && f.data && f.data.slice(0,7) === today().slice(0,7)).reduce((a,f) => a + Number(f.valor||0), 0);
+  const allFin = [...DB.finEmpresa, ...DB.financeiro];
+  const recebido = allFin.filter(f => f.tipo==='entrada' && (f.status==='recebido'||f.status==='pago') && f.data?.slice(0,7)===todayStr.slice(0,7)).reduce((a,f)=>a+Number(f.valor||0),0);
+
+  // habHoje: only today's record
+  const habHoje = DB.habitos.find(hb => hb.data === todayStr);
+  const checks = ['exercicio','alimentacao','meditacao','alcool_nao'];
+  const done = habHoje ? checks.filter(c => habHoje[c] === true || habHoje[c] === 'true').length : 0;
 
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card">
+    <div class="stat-card" style="cursor:pointer" onclick="showSection('habitos')">
+      <div class="stat-label">Hábitos hoje</div>
+      <div class="stat-value" id="stat-habitos-hoje">${done}/${checks.length}</div>
+      <div class="stat-sub">Toque para ver checklist</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="showSection('tarefas')">
       <div class="stat-label">Tarefas hoje</div>
       <div class="stat-value">${tarefasHoje.length}</div>
       <div class="stat-sub">${atrasadas.length} atrasadas</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="cursor:pointer" onclick="showSection('entregas')">
       <div class="stat-label">Entregas abertas</div>
       <div class="stat-value">${entregasAbertas.length}</div>
       <div class="stat-sub">${DB.clientes.filter(c=>c.status==='ativo').length} clientes ativos</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" style="cursor:pointer" onclick="showSection('fin-empresa')">
       <div class="stat-label">Recebido no mês</div>
       <div class="stat-value" style="font-size:18px">${currencyBR(recebido)}</div>
       <div class="stat-sub">Meta: ${currencyBR(DB.config.meta_vendas)}</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Hábitos hoje</div>
-      <div class="stat-value" id="stat-habitos-hoje">—</div>
-      <div class="stat-sub">Cheque o checklist</div>
-    </div>
   `;
 
-  // Tarefas hoje
+  // ─ Hábitos: only today (fresh each day)
+  const dh = document.getElementById('dash-habitos');
+  dh.innerHTML = [
+    {key:'exercicio',lb:'Exercício'},{key:'alimentacao',lb:'Alimentação saudável'},
+    {key:'meditacao',lb:'Meditação/offline'},{key:'alcool_nao',lb:'Sem álcool'}
+  ].map(({key,lb}) => {
+    const checked = habHoje && (habHoje[key] === true || habHoje[key] === 'true');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+      <div class="habit-check ${checked?'done':''}" onclick="toggleHabitoRapido('${key}')">${checked?'✓':''}</div>
+      <span style="font-size:13px">${lb}</span>
+    </div>`;
+  }).join('') + (habHoje?.agua ? `<div style="font-size:12px;color:var(--ym-text-muted);margin-top:8px">Água: ${habHoje.agua}L${habHoje.peso?' · Peso: '+habHoje.peso+'kg':''}</div>` : '');
+
+  // ─ Rotina (tarefas com área ROTINA ou usando tarefas de hoje como proxy)
+  const dr = document.getElementById('dash-rotina');
+  const rotina = DB.tarefas.filter(t => t.area === 'ROTINA' && isToday(t.vencimento) && t.status !== 'concluida');
+  if (!rotina.length) {
+    dr.innerHTML = '<div style="font-size:13px;color:var(--ym-text-light);padding:8px 0">Sem compromissos de rotina hoje.</div>';
+  } else {
+    dr.innerHTML = rotina.slice(0,4).map(t => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1;font-size:13px">${t.titulo}</div>
+        ${statusBadge(t.status)}
+      </div>`).join('');
+  }
+
+  // ─ Tarefas hoje
   const th = document.getElementById('dash-tarefas-hoje');
   if (!tarefasHoje.length && !atrasadas.length) {
     th.innerHTML = '<div class="empty-state"><p>Nenhuma tarefa para hoje.</p></div>';
   } else {
-    const list = [...atrasadas.map(t => ({...t, _late:true})), ...tarefasHoje].slice(0,6);
-    th.innerHTML = list.map(t => `
+    const list = [...atrasadas.map(t=>({...t,_late:true})),...tarefasHoje].slice(0,6);
+    th.innerHTML = list.map(t=>`
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
-        <div style="flex:1;font-size:13px${t._late?' color:var(--ym-danger)':''}">${t.titulo || '—'}</div>
-        ${t._late ? '<span class="badge badge-red">atrasada</span>' : ''}
+        <div style="flex:1;font-size:13px${t._late?';color:var(--ym-danger)':''}">${t.titulo||'—'}</div>
+        ${t._late?'<span class="badge badge-red">atrasada</span>':''}
         ${prioridadeBadge(t.prioridade)}
-      </div>
-    `).join('') + (tarefasHoje.length > 6 ? `<p style="font-size:12px;color:var(--ym-text-light);margin-top:6px">+${tarefasHoje.length-6} mais</p>` : '');
+      </div>`).join('') + (tarefasHoje.length > 6 ? `<p style="font-size:12px;color:var(--ym-text-light);margin-top:6px">+${tarefasHoje.length-6} mais</p>`:'');
   }
 
-  // Entregas
+  // ─ Entregas
   const de = document.getElementById('dash-entregas');
   if (!entregasAbertas.length) {
     de.innerHTML = '<div class="empty-state"><p>Nenhuma entrega em aberto.</p></div>';
   } else {
-    de.innerHTML = entregasAbertas.slice(0,5).map(e => {
-      const cli = DB.clientes.find(c => c.id === e.cliente_id);
-      return `
-        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:500">${e.tipo_entrega || '—'}</div>
-            <div style="font-size:11px;color:var(--ym-text-light)">${cli ? cli.nome : '—'} · Prazo: ${fmtDate(e.prazo_entrega)}</div>
-          </div>
-          ${statusBadge(e.status)}
-        </div>
-      `;
-    }).join('');
+    const cli = Object.fromEntries(DB.clientes.map(c=>[c.id,c.nome]));
+    de.innerHTML = entregasAbertas.slice(0,4).map(e=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${e.tipo_entrega||'—'}</div>
+        <div style="font-size:11px;color:var(--ym-text-light)">${cli[e.cliente_id]||'—'} · ${fmtDate(e.prazo_entrega)}</div></div>
+        ${statusBadge(e.status)}
+      </div>`).join('');
   }
 
-  // Financeiro
+  // ─ Clientes ativos
+  const dc = document.getElementById('dash-clientes');
+  const ativos = DB.clientes.filter(c=>c.status==='ativo').slice(0,4);
+  if (!ativos.length) {
+    dc.innerHTML = '<div style="font-size:13px;color:var(--ym-text-light);padding:8px 0">Nenhum cliente ativo.</div>';
+  } else {
+    dc.innerHTML = ativos.map(c=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${c.nome}</div>
+        <div style="font-size:11px;color:var(--ym-text-light)">${c.proxima_acao||'—'}</div></div>
+        ${statusBadge(c.status)}
+      </div>`).join('');
+  }
+
+  // ─ Projetos em andamento
+  const dp = document.getElementById('dash-projetos');
+  const projs = DB.projetos.filter(p=>p.status==='em andamento').slice(0,3);
+  if (!projs.length) {
+    dp.innerHTML = '<div style="font-size:13px;color:var(--ym-text-light);padding:8px 0">Nenhum projeto em andamento.</div>';
+  } else {
+    dp.innerHTML = projs.map(p=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1;font-size:13px;font-weight:500">${p.nome}</div>
+        ${prioridadeBadge(p.prioridade)}
+      </div>`).join('');
+  }
+
+  // ─ Ideias rápidas (últimas)
+  const di = document.getElementById('dash-ideias');
+  const ideias = [...DB.ideias].filter(i=>i.status==='novo').sort((a,b)=>(b.criado_em||'').localeCompare(a.criado_em||'')).slice(0,4);
+  if (!ideias.length) {
+    di.innerHTML = '<div style="font-size:13px;color:var(--ym-text-light);padding:8px 0">Nenhuma captura recente.</div>';
+  } else {
+    di.innerHTML = ideias.map(i=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <span class="badge badge-blue">${i.tipo||'—'}</span>
+        <div style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.conteudo||'—'}</div>
+      </div>`).join('');
+  }
+
+  // ─ Financeiro (empresa) meta
   const df = document.getElementById('dash-financeiro');
-  const meta = Number(DB.config.meta_vendas || 0);
-  const pct = meta ? Math.min(100, Math.round(recebido / meta * 100)) : 0;
+  const meta = Number(DB.config.meta_vendas||0);
+  const pct = meta ? Math.min(100, Math.round(recebido/meta*100)) : 0;
+  const pendFin = allFin.filter(f=>f.status==='pendente'||f.status==='atrasado').slice(0,3);
   df.innerHTML = `
-    <div style="margin-bottom:12px">
+    <div style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
-        <span>Meta do mês: ${currencyBR(meta)}</span>
-        <span style="font-weight:600;color:var(--ym-accent)">${pct}%</span>
+        <span>Meta: ${currencyBR(meta)}</span><span style="font-weight:600;color:var(--ym-accent)">${pct}%</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div style="font-size:12px;color:var(--ym-text-muted);margin-top:4px">Faltam ${currencyBR(Math.max(0, meta - recebido))}</div>
+      <div style="font-size:12px;color:var(--ym-text-muted);margin-top:4px">Faltam ${currencyBR(Math.max(0,meta-recebido))}</div>
     </div>
-    ${DB.financeiro.filter(f => f.status === 'pendente' || f.status === 'atrasado').slice(0,3).map(f => `
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
-        <div style="flex:1;font-size:13px">${f.descricao||'—'}</div>
-        <span style="font-weight:600;font-size:13px${f.tipo==='entrada'?' color:var(--ym-success)':' color:var(--ym-danger)'}">${f.tipo==='saida'?'-':''}${currencyBR(f.valor)}</span>
-        ${statusBadge(f.status)}
-      </div>
-    `).join('')}
+    ${pendFin.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9">
+      <div style="flex:1;font-size:12px">${f.descricao||'—'}</div>
+      <span style="font-weight:600;font-size:12px;color:${f.tipo==='entrada'?'var(--ym-success)':'var(--ym-danger)'}">${currencyBR(f.valor)}</span>
+      ${statusBadge(f.status)}</div>`).join('')}
   `;
 
-  // Hábitos
-  const dh = document.getElementById('dash-habitos');
-  const habHoje = DB.habitos.find(h => h.data === today());
-  const checks = ['exercicio','alimentacao','meditacao','alcool_nao'];
-  const done = habHoje ? checks.filter(c => habHoje[c]).length : 0;
-  document.getElementById('stat-habitos-hoje').textContent = `${done}/${checks.length}`;
-  dh.innerHTML = `
-    ${['Exercício','Alimentação saudável','Meditação/offline','Sem álcool'].map((lb, i) => {
-      const key = checks[i];
-      const checked = habHoje && habHoje[key];
-      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f1f5f9">
-        <div class="habit-check ${checked ? 'done' : ''}" onclick="toggleHabitoRapido('${key}')">${checked ? '✓' : ''}</div>
-        <span style="font-size:13px">${lb}</span>
-      </div>`;
-    }).join('')}
-    ${habHoje && habHoje.agua ? `<div style="font-size:12px;color:var(--ym-text-muted);margin-top:8px">Água: ${habHoje.agua}L · Peso: ${habHoje.peso||'—'}kg</div>` : ''}
-  `;
+  // ─ Plano financeiro (empresa + pessoal top priorities)
+  const dpl = document.getElementById('dash-plano');
+  const planos = [...DB.planoEmpresa,...DB.planoPessoal].filter(p=>p.status!=='concluida'&&p.status!=='cancelada');
+  planos.sort((a,b)=>{const po={urgente:0,alta:1,media:2,baixa:3};return (po[a.prioridade]||4)-(po[b.prioridade]||4);});
+  if (!planos.length) {
+    dpl.innerHTML = '<div style="font-size:13px;color:var(--ym-text-light);padding:8px 0">Nenhuma ação financeira pendente.</div>';
+  } else {
+    dpl.innerHTML = planos.slice(0,4).map(p=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.objetivo||'—'}</div>
+        <div style="font-size:11px;color:var(--ym-text-light)">${p.acao||'—'}</div></div>
+        ${prioridadeBadge(p.prioridade)}
+      </div>`).join('');
+  }
 }
 
 function toggleHabitoRapido(key) {
-  let h = DB.habitos.find(h => h.data === today());
-  if (!h) { h = { id: uid(), data: today() }; DB.habitos.push(h); }
-  h[key] = !h[key];
+  const todayStr = today();
+  let h = DB.habitos.find(hb => hb.data === todayStr);
+  if (!h) { h = { id: uid(), data: todayStr }; DB.habitos.push(h); }
+  h[key] = !(h[key] === true || h[key] === 'true');
   saveAll();
   renderDashboard();
 }
@@ -1464,7 +1623,7 @@ function filterEntregas(f, el) {
 function filterEntregasByCliente(v) { renderTabelaEntregas(v); }
 
 // ═══════════════════════════════════════════════
-// PROJETOS
+// PROJETOS (with subtarefas button)
 // ═══════════════════════════════════════════════
 function renderProjetos() {
   const grid = document.getElementById('grid-projetos');
@@ -1472,9 +1631,26 @@ function renderProjetos() {
     grid.innerHTML = `<div class="card empty-state"><p>Nenhum projeto cadastrado.</p></div>`;
     return;
   }
-  const prioBadge = { 'baixa':'badge-gray','media':'badge-blue','alta':'badge-yellow','urgente':'badge-red' };
-  grid.innerHTML = DB.projetos.map(p => `
-    <div class="card" style="border-left:4px solid var(--ym-accent)">
+  grid.innerHTML = DB.projetos.map(p => {
+    const subs = DB.subtarefasProj.filter(s => s.projeto_id === p.id);
+    const subDone = subs.filter(s => s.status === 'concluida').length;
+    const subList = subs.length ? subs.map(s => {
+      const late = isOverdue(s.prazo) && s.status !== 'concluida';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f4f8">
+        <div class="habit-check ${s.status==='concluida'?'done':''}" style="width:18px;height:18px;border-radius:4px;flex-shrink:0"
+          onclick="toggleSubProjStatus('${s.id}','${p.id}')">${s.status==='concluida'?'✓':''}</div>
+        <div style="flex:1;font-size:12px;${s.status==='concluida'?'text-decoration:line-through;color:var(--ym-text-light)':''}${late?'color:var(--ym-danger)':''}">${s.subtarefa||'—'}</div>
+        ${s.prazo&&s.status!=='concluida'?`<span style="font-size:10px;color:${late?'var(--ym-danger)':'var(--ym-text-light)'};">${fmtDate(s.prazo)}</span>`:''}
+        ${prioridadeBadge(s.prioridade)}
+        <div class="action-btns">
+          <button class="btn btn-sm" style="padding:2px 6px" onclick="editarSubProjNoCard('${s.id}','${p.id}')">✎</button>
+          <button class="btn btn-sm btn-danger" style="padding:2px 6px" onclick="excluirSubProjCard('${s.id}','${p.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('') : `<div style="font-size:12px;color:var(--ym-text-light);padding:6px 0;text-align:center">Nenhuma subtarefa. Clique em + Subtarefa para começar.</div>`;
+
+    return `
+    <div class="card" style="border-left:4px solid var(--ym-accent)" id="proj-card-${p.id}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
         <div>
           <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;margin-bottom:4px">${p.nome||'—'}</div>
@@ -1485,116 +1661,252 @@ function renderProjetos() {
           <button class="btn btn-sm btn-danger" onclick="deleteItem('projeto','${p.id}')">✕</button>
         </div>
       </div>
-      <div style="font-size:12px;color:var(--ym-text-muted);margin-bottom:10px">${p.objetivo||'—'}</div>
+      <div style="font-size:12px;color:var(--ym-text-muted);margin-bottom:8px">${p.objetivo||'—'}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
         ${statusBadge(p.status)} ${prioridadeBadge(p.prioridade)}
         ${p.prazo ? `<span style="font-size:11px;color:${isOverdue(p.prazo)?'var(--ym-danger)':'var(--ym-text-muted)'}">Prazo: ${fmtDate(p.prazo)}</span>` : ''}
       </div>
-      ${p.proximas_acoes ? `<div style="font-size:12px;color:var(--ym-text);background:#f8fafc;border-radius:6px;padding:8px"><b>Próximas ações:</b> ${p.proximas_acoes}</div>` : ''}
-    </div>
-  `).join('');
+      ${p.proximas_acoes ? `<div style="font-size:12px;color:var(--ym-text);background:#f8fafc;border-radius:6px;padding:8px;margin-bottom:10px"><b>Próximas ações:</b> ${p.proximas_acoes}</div>` : ''}
+
+      <!-- SUBTAREFAS INLINE -->
+      <div style="border-top:1px solid var(--ym-border);padding-top:10px;margin-top:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:600;color:var(--ym-text-muted)">SUBTAREFAS ${subDone}/${subs.length}</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm btn-primary" style="font-size:11px;padding:4px 10px" onclick="novaSubtarefaProj('${p.id}')">+ Subtarefa</button>
+            ${subs.length ? `<button class="btn btn-sm" style="font-size:11px;padding:4px 10px" onclick="abrirSubtarefasProj('${p.id}')">Ver todas</button>` : ''}
+          </div>
+        </div>
+        <div id="sub-list-${p.id}">${subList}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════
-// FINANCEIRO
+// SUBTAREFAS DE PROJETOS
 // ═══════════════════════════════════════════════
-let finFilter = 'todos';
 
-function renderFinanceiro() {
+// Abre modal com projeto_id já preenchido e bloqueado
+function novaSubtarefaProj(projetoId) {
+  modalType = 'subtarefa-proj';
+  editId = null;
+  _subProjPresetId = projetoId;
+  const proj = DB.projetos.find(p => p.id === projetoId);
+  document.getElementById('modal-title').textContent = 'Nova subtarefa — ' + (proj ? proj.nome : '');
+  document.getElementById('modal-body').innerHTML = getSubProjForm({}, projetoId);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// Editar subtarefa com projeto já sabido (re-render card ao salvar)
+function editarSubProjNoCard(subId, projetoId) {
+  _subProjContextProjId = projetoId;
+  editItem('subtarefa-proj', subId);
+}
+
+// Excluir direto no card e re-render apenas aquele card
+function excluirSubProjCard(subId, projetoId) {
+  if (!confirm('Excluir subtarefa?')) return;
+  const idx = DB.subtarefasProj.findIndex(s => s.id === subId);
+  if (idx >= 0) DB.subtarefasProj.splice(idx, 1);
+  saveAll();
+  showToast('Subtarefa excluída.');
+  renderProjetos();
+}
+
+// Toggle rápido de concluída direto no card
+function toggleSubProjStatus(subId, projetoId) {
+  const s = DB.subtarefasProj.find(s => s.id === subId);
+  if (!s) return;
+  s.status = s.status === 'concluida' ? 'pendente' : 'concluida';
+  saveAll();
+  renderProjetos();
+}
+
+let _subProjPresetId = null;    // projeto_id pré-definido ao criar via card
+let _subProjContextProjId = null; // projeto_id de contexto ao editar via card
+
+function abrirSubtarefasProj(projetoId) {
+  showSection('subtarefas-proj');
+  setTimeout(() => {
+    const sel = document.getElementById('sel-projeto-sub');
+    if (sel) { sel.value = projetoId; filterSubProj(projetoId); }
+  }, 50);
+}
+
+function renderSubtarefasProj() {
+  populateSelectProjetos('sel-projeto-sub');
+  renderTabelaSubProj('');
+}
+
+function populateSelectProjetos(id) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">Todos os projetos</option>` +
+    DB.projetos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+function filterSubProj(val) { renderTabelaSubProj(val); }
+
+function renderTabelaSubProj(projFilter) {
+  let data = [...DB.subtarefasProj];
+  if (projFilter) data = data.filter(s=>s.projeto_id===projFilter);
+  const projMap = Object.fromEntries(DB.projetos.map(p=>[p.id,p.nome]));
+  const tbody = document.getElementById('tbody-subtarefas-proj');
+  if (!tbody) return;
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhuma subtarefa encontrada.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(s=>`
+    <tr>
+      <td style="font-size:12px">${projMap[s.projeto_id]||'—'}</td>
+      <td style="font-size:12px">${s.tarefa_principal||'—'}</td>
+      <td style="font-weight:500">${s.subtarefa||'—'}</td>
+      <td style="font-size:12px">${s.responsavel||'—'}</td>
+      <td style="font-size:12px;color:${isOverdue(s.prazo)?'var(--ym-danger)':'var(--ym-text-muted)'}">${fmtDate(s.prazo)}</td>
+      <td>${prioridadeBadge(s.prioridade)}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-sm" onclick="editItem('subtarefa-proj','${s.id}')">✎</button>
+        ${s.status!=='concluida'?`<button class="btn btn-sm" style="color:var(--ym-success)" onclick="concluirSubProj('${s.id}')">✓</button>`:''}
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('subtarefa-proj','${s.id}')">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function concluirSubProj(id) {
+  const s = DB.subtarefasProj.find(s=>s.id===id);
+  if (s) { s.status='concluida'; saveAll(); renderTabelaSubProj(''); showToast('Subtarefa concluída!'); }
+}
+
+// ═══════════════════════════════════════════════
+// FINANCEIRO PESSOAL
+// ═══════════════════════════════════════════════
+let finPessoalFilter = 'todos';
+function renderFinPessoal() {
   const mesAtual = today().slice(0,7);
-  const entradas = DB.financeiro.filter(f => f.tipo==='entrada' && f.data?.slice(0,7)===mesAtual);
-  const saidas = DB.financeiro.filter(f => f.tipo==='saida' && f.data?.slice(0,7)===mesAtual);
-  const recebido = entradas.filter(f => f.status==='recebido'||f.status==='pago').reduce((a,f)=>a+Number(f.valor||0),0);
-  const previsto = entradas.filter(f => f.status==='previsto').reduce((a,f)=>a+Number(f.valor||0),0);
-  const pagar = saidas.filter(f => f.status==='pendente'||f.status==='atrasado').reduce((a,f)=>a+Number(f.valor||0),0);
-  const meta = Number(DB.config.meta_vendas || 0);
-  const pct = meta ? Math.min(100, Math.round(recebido/meta*100)) : 0;
+  const data = DB.finPessoal;
+  const entradas = data.filter(f=>f.tipo==='entrada'&&f.data?.slice(0,7)===mesAtual);
+  const saidas = data.filter(f=>f.tipo==='saida'&&f.data?.slice(0,7)===mesAtual);
+  const recebido = entradas.filter(f=>f.status==='recebido'||f.status==='pago').reduce((a,f)=>a+Number(f.valor||0),0);
+  const pagar = saidas.filter(f=>f.status==='pendente'||f.status==='atrasado').reduce((a,f)=>a+Number(f.valor||0),0);
+  document.getElementById('stats-fin-pessoal').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Recebido</div><div class="stat-value" style="font-size:18px;color:var(--ym-success)">${currencyBR(recebido)}</div></div>
+    <div class="stat-card"><div class="stat-label">A pagar</div><div class="stat-value" style="font-size:18px;color:var(--ym-danger)">${currencyBR(pagar)}</div></div>
+    <div class="stat-card"><div class="stat-label">Saldo</div><div class="stat-value" style="font-size:18px">${currencyBR(recebido-pagar)}</div></div>
+    <div class="stat-card"><div class="stat-label">Registros</div><div class="stat-value">${data.length}</div></div>`;
+  renderTabelaFinSub('pessoal');
+}
 
-  document.getElementById('meta-financeiro').innerHTML = `
+function renderFinEmpresa() {
+  const mesAtual = today().slice(0,7);
+  const data = [...DB.finEmpresa, ...DB.financeiro];
+  const entradas = data.filter(f=>f.tipo==='entrada'&&f.data?.slice(0,7)===mesAtual);
+  const saidas = data.filter(f=>f.tipo==='saida'&&f.data?.slice(0,7)===mesAtual);
+  const recebido = entradas.filter(f=>f.status==='recebido'||f.status==='pago').reduce((a,f)=>a+Number(f.valor||0),0);
+  const previsto = entradas.filter(f=>f.status==='previsto').reduce((a,f)=>a+Number(f.valor||0),0);
+  const pagar = saidas.filter(f=>f.status==='pendente'||f.status==='atrasado').reduce((a,f)=>a+Number(f.valor||0),0);
+  const meta = Number(DB.config.meta_vendas||0);
+  const pct = meta ? Math.min(100,Math.round(recebido/meta*100)) : 0;
+
+  const mb = document.getElementById('meta-financeiro');
+  if (mb) mb.innerHTML = `
     <div class="meta-info"><span class="meta-title">Meta de vendas do mês</span><span class="meta-pct">${pct}%</span></div>
     <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ym-text-muted);margin-top:6px">
-      <span>Recebido: ${currencyBR(recebido)}</span>
-      <span>Meta: ${currencyBR(meta)}</span>
+      <span>Recebido: ${currencyBR(recebido)}</span><span>Meta: ${currencyBR(meta)}</span>
       <span style="color:var(--ym-danger)">Faltam: ${currencyBR(Math.max(0,meta-recebido))}</span>
-    </div>
-  `;
+    </div>`;
 
-  document.getElementById('stats-fin').innerHTML = `
+  const sf = document.getElementById('stats-fin-empresa');
+  if (sf) sf.innerHTML = `
     <div class="stat-card"><div class="stat-label">Recebido</div><div class="stat-value" style="font-size:18px;color:var(--ym-success)">${currencyBR(recebido)}</div></div>
     <div class="stat-card"><div class="stat-label">Previsto</div><div class="stat-value" style="font-size:18px;color:var(--ym-info)">${currencyBR(previsto)}</div></div>
     <div class="stat-card"><div class="stat-label">A pagar</div><div class="stat-value" style="font-size:18px;color:var(--ym-danger)">${currencyBR(pagar)}</div></div>
-    <div class="stat-card"><div class="stat-label">Saldo líquido</div><div class="stat-value" style="font-size:18px">${currencyBR(recebido - pagar)}</div></div>
-  `;
-
-  renderTabelaFinanceiro();
+    <div class="stat-card"><div class="stat-label">Saldo</div><div class="stat-value" style="font-size:18px">${currencyBR(recebido-pagar)}</div></div>`;
+  renderTabelaFinSub('empresa');
 }
 
-function renderTabelaFinanceiro() {
-  let data = [...DB.financeiro];
-  if (finFilter === 'entrada') data = data.filter(f => f.tipo==='entrada');
-  else if (finFilter === 'saida') data = data.filter(f => f.tipo==='saida');
-  else if (finFilter === 'pendente') data = data.filter(f => f.status==='pendente');
-  else if (finFilter === 'atrasado') data = data.filter(f => f.status==='atrasado');
-  data.sort((a,b) => (b.data||'').localeCompare(a.data||''));
-  const tbody = document.getElementById('tbody-financeiro');
+let finEmpresaFilter = 'todos';
+function filterFinSub(tipo, f, el) {
+  if (tipo==='pessoal') finPessoalFilter = f;
+  else finEmpresaFilter = f;
+  const sec = tipo==='pessoal' ? '#filtros-fin-pessoal' : '#filtros-fin-empresa';
+  document.querySelectorAll(sec+' .filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderTabelaFinSub(tipo);
+}
+
+function renderTabelaFinSub(tipo) {
+  const isPessoal = tipo==='pessoal';
+  const filt = isPessoal ? finPessoalFilter : finEmpresaFilter;
+  let data = isPessoal ? [...DB.finPessoal] : [...DB.finEmpresa,...DB.financeiro];
+  if (filt==='entrada') data = data.filter(f=>f.tipo==='entrada');
+  else if (filt==='saida') data = data.filter(f=>f.tipo==='saida');
+  else if (filt==='pendente') data = data.filter(f=>f.status==='pendente');
+  else if (filt==='atrasado') data = data.filter(f=>f.status==='atrasado');
+  data.sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  const tbodyId = isPessoal ? 'tbody-fin-pessoal' : 'tbody-fin-empresa';
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhum registro encontrado.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><p>Nenhum registro.</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = data.map(f => `
+  const modalT = isPessoal ? 'fin-pessoal' : 'fin-empresa';
+  tbody.innerHTML = data.map(f=>`
     <tr>
       <td><span class="badge ${f.tipo==='entrada'?'badge-green':'badge-red'}">${f.tipo||'—'}</span></td>
       <td style="font-weight:500">${f.descricao||'—'}</td>
       <td style="font-weight:700;color:${f.tipo==='entrada'?'var(--ym-success)':'var(--ym-danger)'}">${f.tipo==='saida'?'-':''}${currencyBR(f.valor)}</td>
       <td style="font-size:12px">${fmtDate(f.data)}</td>
       <td style="font-size:12px">${f.categoria||'—'}</td>
+      ${!isPessoal ? `<td style="font-size:12px">${f.origem||'—'}</td>` : ''}
       <td>${statusBadge(f.status)}</td>
-      <td style="font-size:12px">${f.forma||'—'}</td>
+      ${!isPessoal ? `<td style="font-size:12px">${f.margem?f.margem+'%':'—'}</td>` : ''}
       <td><div class="action-btns">
-        <button class="btn btn-sm" onclick="editItem('financeiro','${f.id}')">✎</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteItem('financeiro','${f.id}')">✕</button>
+        <button class="btn btn-sm" onclick="editItem('${modalT}','${f.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('${modalT}','${f.id}')">✕</button>
       </div></td>
-    </tr>
-  `).join('');
-}
-
-function filterFin(f, el) {
-  finFilter = f;
-  document.querySelectorAll('#sec-financeiro .filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  renderTabelaFinanceiro();
+    </tr>`).join('');
 }
 
 // ═══════════════════════════════════════════════
-// PLANO FINANCEIRO
+// PLANO FINANCEIRO (pessoal / empresa)
 // ═══════════════════════════════════════════════
-function renderPlano() {
-  const data = [...DB.plano].sort((a,b) => {
-    const po = {urgente:0,alta:1,media:2,baixa:3};
-    return (po[a.prioridade]||4) - (po[b.prioridade]||4);
-  });
-  const tbody = document.getElementById('tbody-plano');
+function renderPlanoSub(tipo) {
+  const isPessoal = tipo==='pessoal';
+  const arr = isPessoal ? DB.planoPessoal : [...DB.planoEmpresa,...DB.plano];
+  const data = [...arr].sort((a,b)=>{const po={urgente:0,alta:1,media:2,baixa:3};return (po[a.prioridade]||4)-(po[b.prioridade]||4);});
+  const tbodyId = isPessoal ? 'tbody-plano-pessoal' : 'tbody-plano-empresa';
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Nenhuma ação financeira cadastrada.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhuma ação cadastrada.</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = data.map(p => `
+  const modalT = isPessoal ? 'plano-pessoal' : 'plano-empresa';
+  tbody.innerHTML = data.map(p=>`
     <tr>
-      <td style="font-weight:500;max-width:160px">${p.objetivo||'—'}</td>
-      <td style="font-size:12px;max-width:180px">${p.acao||'—'}</td>
-      <td><span class="badge badge-blue">${p.tipo||'—'}</span></td>
-      <td style="font-weight:600">${p.valor_estimado ? currencyBR(p.valor_estimado) : '—'}</td>
+      <td style="font-weight:500">${p.objetivo||'—'}</td>
+      <td style="font-size:12px">${p.acao||'—'}</td>
+      <td style="font-weight:600">${p.valor_estimado?currencyBR(p.valor_estimado):'—'}</td>
       <td style="font-size:12px">${fmtDate(p.prazo)}</td>
       <td>${prioridadeBadge(p.prioridade)}</td>
       <td>${statusBadge(p.status)}</td>
       <td><div class="action-btns">
-        <button class="btn btn-sm" onclick="editItem('plano','${p.id}')">✎</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteItem('plano','${p.id}')">✕</button>
+        <button class="btn btn-sm" onclick="editItem('${modalT}','${p.id}')">✎</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('${modalT}','${p.id}')">✕</button>
       </div></td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
+
+// Legacy aliases (keep old routes working)
+function renderFinanceiro() { renderFinEmpresa(); }
+function renderPlano() { renderPlanoSub('empresa'); }
 
 // ═══════════════════════════════════════════════
 // HÁBITOS
@@ -1890,8 +2202,11 @@ function openModal(type, id) {
   const overlay = document.getElementById('modal-overlay');
   const titles = {
     tarefa:'Tarefa', cliente:'Cliente', subtarefa:'Subtarefa',
-    entrega:'Entrega', projeto:'Projeto', financeiro:'Financeiro',
-    plano:'Ação financeira', habito:'Registro de hábito', ideia:'Ideia / Captura',
+    'subtarefa-proj':'Subtarefa de Projeto',
+    entrega:'Entrega', projeto:'Projeto',
+    financeiro:'Financeiro', 'fin-pessoal':'Financeiro Pessoal', 'fin-empresa':'Financeiro Empresa',
+    plano:'Ação financeira', 'plano-pessoal':'Ação Pessoal', 'plano-empresa':'Ação Empresa',
+    habito:'Registro de hábito', ideia:'Ideia / Captura',
     captura:'Captura rápida'
   };
   document.getElementById('modal-title').textContent = (id ? 'Editar ' : 'Nova ') + (titles[type] || type);
@@ -1902,6 +2217,8 @@ function openModal(type, id) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   modalType = null; editId = null;
+  _subProjPresetId = null;
+  _subProjContextProjId = null;
 }
 
 function getCliOpts() {
@@ -2013,14 +2330,101 @@ function getFormHtml(type, id) {
     <div class="form-group"><label>Status</label><select name="status"><option>novo</option><option>processado</option><option>descartado</option></select></div>
   </div>`;
 
+  if (type === 'fin-pessoal') { const rec2 = id ? (DB.finPessoal||[]).find(r=>r.id===id)||{} : {}; return getFinPessoalForm(rec2); }
+  if (type === 'fin-empresa') { const rec2 = id ? ([...DB.finEmpresa,...DB.financeiro]).find(r=>r.id===id)||{} : {}; return getFinEmpresaForm(rec2); }
+  if (type === 'plano-pessoal') { const rec2 = id ? (DB.planoPessoal||[]).find(r=>r.id===id)||{} : {}; return getPlanoForm(rec2); }
+  if (type === 'plano-empresa') { const rec2 = id ? ([...DB.planoEmpresa,...DB.plano]).find(r=>r.id===id)||{} : {}; return getPlanoForm(rec2); }
+  if (type === 'subtarefa-proj') {
+    const rec2 = id ? (DB.subtarefasProj||[]).find(r=>r.id===id)||{} : {};
+    const presetId = id ? null : _subProjPresetId;
+    return getSubProjForm(rec2, presetId);
+  }
+
   return '<p style="color:var(--ym-text-muted)">Formulário não encontrado.</p>';
+}
+
+// ─ FIN PESSOAL form
+function getFinPessoalForm(rec) {
+  const v=(k,d='')=>rec[k]!==undefined?rec[k]:d;
+  const sel=(k,opts,def='')=>`<select name="${k}">${opts.map(o=>`<option value="${o}" ${v(k,def)===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<div class="form-grid">
+    <div class="form-group"><label>Tipo *</label><select name="tipo"><option value="entrada" ${v('tipo')==='entrada'?'selected':''}>Entrada</option><option value="saida" ${v('tipo')==='saida'?'selected':''}>Saída</option></select></div>
+    <div class="form-group"><label>Valor *</label><input name="valor" type="number" step="0.01" value="${v('valor')}" required></div>
+    <div class="form-group full"><label>Descrição *</label><input name="descricao" value="${v('descricao')}" required></div>
+    <div class="form-group"><label>Data</label><input type="date" name="data" value="${v('data',today())}"></div>
+    <div class="form-group"><label>Categoria</label><input name="categoria" value="${v('categoria')}" placeholder="ex: Alimentação, Lazer..."></div>
+    <div class="form-group"><label>Status</label>${sel('status',DB.config.STATUS_FINANCEIRO,'previsto')}</div>
+    <div class="form-group"><label>Forma pagamento</label><input name="forma_pagamento" value="${v('forma_pagamento')}" placeholder="Pix, Cartão..."></div>
+    <div class="form-group full"><label>Observação</label><textarea name="observacao">${v('observacao')}</textarea></div>
+  </div>`;
+}
+
+// ─ FIN EMPRESA form
+function getFinEmpresaForm(rec) {
+  const v=(k,d='')=>rec[k]!==undefined?rec[k]:d;
+  const sel=(k,opts,def='')=>`<select name="${k}">${opts.map(o=>`<option value="${o}" ${v(k,def)===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<div class="form-grid">
+    <div class="form-group"><label>Tipo *</label><select name="tipo"><option value="entrada" ${v('tipo')==='entrada'?'selected':''}>Receita</option><option value="saida" ${v('tipo')==='saida'?'selected':''}>Custo/Despesa</option></select></div>
+    <div class="form-group"><label>Valor *</label><input name="valor" type="number" step="0.01" value="${v('valor')}" required></div>
+    <div class="form-group full"><label>Descrição *</label><input name="descricao" value="${v('descricao')}" required></div>
+    <div class="form-group"><label>Data</label><input type="date" name="data" value="${v('data',today())}"></div>
+    <div class="form-group"><label>Categoria</label><input name="categoria" value="${v('categoria')}" placeholder="Clientes, Ferramentas..."></div>
+    <div class="form-group"><label>Origem / Cliente</label><input name="origem" value="${v('origem')}" placeholder="Nome do cliente ou fonte"></div>
+    <div class="form-group"><label>Status</label>${sel('status',DB.config.STATUS_FINANCEIRO,'previsto')}</div>
+    <div class="form-group"><label>Forma pagamento</label><input name="forma_pagamento" value="${v('forma_pagamento')}" placeholder="Pix, TED..."></div>
+    <div class="form-group"><label>Margem (%)</label><input name="margem" type="number" step="0.1" value="${v('margem')}" placeholder="0"></div>
+    <div class="form-group full"><label>Observação</label><textarea name="observacao">${v('observacao')}</textarea></div>
+  </div>`;
+}
+
+// ─ PLANO form (pessoal/empresa)
+function getPlanoForm(rec) {
+  const v=(k,d='')=>rec[k]!==undefined?rec[k]:d;
+  const sel=(k,opts,def='')=>`<select name="${k}">${opts.map(o=>`<option value="${o}" ${v(k,def)===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<div class="form-grid">
+    <div class="form-group full"><label>Objetivo *</label><input name="objetivo" value="${v('objetivo')}" required placeholder="ex: Bater meta de R$5k"></div>
+    <div class="form-group full"><label>Ação *</label><input name="acao" value="${v('acao')}" placeholder="ex: Enviar proposta para cliente X"></div>
+    <div class="form-group"><label>Valor estimado</label><input name="valor_estimado" type="number" step="0.01" value="${v('valor_estimado')}"></div>
+    <div class="form-group"><label>Prazo</label><input type="date" name="prazo" value="${v('prazo')}"></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade',DB.config.PRIORIDADES,'alta')}</div>
+    <div class="form-group"><label>Status</label>${sel('status',DB.config.STATUS_TAREFAS,'pendente')}</div>
+    <div class="form-group full"><label>Observações</label><textarea name="observacoes">${v('observacoes')}</textarea></div>
+  </div>`;
+}
+
+// ─ SUBTAREFA PROJETO form
+function getSubProjForm(rec, presetProjetoId) {
+  const v=(k,d='')=>rec[k]!==undefined?rec[k]:d;
+  const sel=(k,opts,def='')=>`<select name="${k}">${opts.map(o=>`<option value="${o}" ${v(k,def)===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  const projId = presetProjetoId || v('projeto_id');
+  const proj = DB.projetos.find(p=>p.id===projId);
+  const projField = projId
+    ? `<div class="form-group full">
+        <label>Projeto</label>
+        <input type="text" value="${proj?proj.nome:'—'}" disabled style="background:#f8fafc;color:var(--ym-text-muted)">
+        <input type="hidden" name="projeto_id" value="${projId}">
+      </div>`
+    : `<div class="form-group full"><label>Projeto *</label><select name="projeto_id"><option value="">Selecione...</option>${DB.projetos.map(p=>`<option value="${p.id}" ${projId===p.id?'selected':''}>${p.nome}</option>`).join('')}</select></div>`;
+  return `<div class="form-grid">
+    ${projField}
+    <div class="form-group full"><label>Tarefa principal</label><input name="tarefa_principal" value="${v('tarefa_principal')}" placeholder="ex: Conteúdo de redes sociais"></div>
+    <div class="form-group full"><label>Subtarefa *</label><input name="subtarefa" value="${v('subtarefa')}" required placeholder="ex: Criar roteiro de reels"></div>
+    <div class="form-group"><label>Responsável</label><input name="responsavel" value="${v('responsavel')}"></div>
+    <div class="form-group"><label>Prazo</label><input type="date" name="prazo" value="${v('prazo')}"></div>
+    <div class="form-group"><label>Prioridade</label>${sel('prioridade',DB.config.PRIORIDADES,'media')}</div>
+    <div class="form-group"><label>Status</label>${sel('status',DB.config.STATUS_TAREFAS,'pendente')}</div>
+    <div class="form-group full"><label>Observação</label><textarea name="observacao">${v('observacao')}</textarea></div>
+  </div>`;
 }
 
 function pluralMap(type) {
   const map = {
     tarefa:'tarefas', cliente:'clientes', subtarefa:'subtarefas', entrega:'entregas',
     projeto:'projetos', financeiro:'financeiro', plano:'plano', habito:'habitos',
-    ideia:'ideias', captura:'ideias'
+    ideia:'ideias', captura:'ideias',
+    'fin-pessoal':'finPessoal', 'fin-empresa':'finEmpresa',
+    'plano-pessoal':'planoPessoal', 'plano-empresa':'planoEmpresa',
+    'subtarefa-proj':'subtarefasProj'
   };
   return map[type];
 }
@@ -2030,6 +2434,11 @@ function salvarModal() {
   const inputs = body.querySelectorAll('input,select,textarea');
   const data = {};
   inputs.forEach(inp => { if (inp.name) data[inp.name] = inp.value; });
+
+  // Inject pre-set projeto_id if creating from card
+  if (modalType === 'subtarefa-proj' && !editId && _subProjPresetId) {
+    data.projeto_id = _subProjPresetId;
+  }
 
   const arr = DB[pluralMap(modalType)];
   if (!arr) { closeModal(); return; }
@@ -2045,6 +2454,23 @@ function salvarModal() {
   saveAll();
   closeModal();
   showToast(editId ? 'Registro atualizado!' : 'Registro salvo!');
+
+  // After saving a subtarefa-proj, always re-render projetos so the card updates inline
+  if (modalType === 'subtarefa-proj') {
+    _subProjPresetId = null;
+    _subProjContextProjId = null;
+    const active = document.querySelector('.section.active');
+    const activeId = active ? active.id.replace('sec-','') : '';
+    if (activeId === 'projetos' || activeId === 'subtarefas-proj') {
+      renderSection(activeId);
+    } else {
+      renderProjetos();
+    }
+    return;
+  }
+
+  _subProjPresetId = null;
+  _subProjContextProjId = null;
 
   // Re-render current section
   const active = document.querySelector('.section.active');
