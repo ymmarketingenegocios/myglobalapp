@@ -30,13 +30,15 @@
   --shadow-md:0 4px 16px rgba(0,0,0,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;overflow-x:hidden}
 
 /* ═══ HEADER ═══════════════════════════════════════════════ */
 #hdr{
   background:var(--navy);height:var(--hdr);
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;
+  padding:0 max(16px,env(safe-area-inset-right,16px)) 0 max(16px,env(safe-area-inset-left,16px));
+  gap:10px;position:sticky;top:0;z-index:100;
   box-shadow:0 2px 10px rgba(0,0,0,.3)
 }
 .logo{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.3px;white-space:nowrap;user-select:none}
@@ -49,15 +51,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 #burger{display:none;background:none;border:none;color:#e2e8f0;font-size:22px;cursor:pointer;padding:2px 6px;line-height:1}
 
 /* ═══ LAYOUT ════════════════════════════════════════════════ */
-#app{display:flex;height:calc(100vh - var(--hdr));overflow:hidden}
+#app{display:flex;height:calc(100vh - var(--hdr));height:calc(100dvh - var(--hdr));overflow:hidden}
 #sidebar{
   width:var(--sidebar);background:var(--navy);
   display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;
   transition:transform .25s;scrollbar-width:none
 }
 #sidebar::-webkit-scrollbar{display:none}
-#main{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
-.section{display:none}.section.active{display:flex;flex-direction:column;gap:16px}
+#main{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px;-webkit-overflow-scrolling:touch}
+.section{display:none}.section.active{display:flex;flex-direction:column;gap:16px;padding-bottom:80px}
 #sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90}
 
 /* ═══ SIDEBAR NAV ════════════════════════════════════════════ */
@@ -75,7 +77,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* ═══ FAB ═══════════════════════════════════════════════════ */
 #fab{
-  position:fixed;bottom:20px;right:20px;
+  position:fixed;bottom:calc(20px + env(safe-area-inset-bottom, 0px));right:calc(20px + env(safe-area-inset-right, 0px));
   width:50px;height:50px;border-radius:50%;
   background:var(--accent);color:#fff;border:none;font-size:26px;
   cursor:pointer;box-shadow:var(--shadow-md);
@@ -86,7 +88,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* ═══ TOAST ═════════════════════════════════════════════════ */
 #toast{
-  position:fixed;bottom:80px;right:20px;
+  position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:20px;
   background:var(--navy);color:#fff;
   padding:8px 15px;border-radius:var(--rs);
   font-size:13px;font-weight:500;
@@ -116,24 +118,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .overlay{
   display:none;position:fixed;inset:0;
   background:rgba(10,22,40,.6);z-index:999;
-  align-items:center;justify-content:center;padding:12px
+  align-items:center;justify-content:center;
+  padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))
 }
 .overlay.open{display:flex}
 .modal{
   background:var(--surface);border-radius:var(--r);
-  width:100%;max-width:540px;max-height:92vh;
-  overflow-y:auto;box-shadow:var(--shadow-md)
+  width:100%;max-width:540px;max-height:88vh;max-height:88dvh;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:var(--shadow-md)
 }
 .mhdr{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 18px;border-bottom:1px solid var(--border);
   font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--navy);
-  position:sticky;top:0;background:var(--surface);z-index:1
+  position:sticky;top:0;background:var(--surface);z-index:2
 }
+.mhdr .btn{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
 .mbody{padding:16px 18px}
 .mftr{
   display:flex;justify-content:flex-end;gap:8px;
-  padding:12px 18px;border-top:1px solid var(--border)
+  padding:12px 18px;border-top:1px solid var(--border);
+  position:sticky;bottom:0;background:var(--surface);z-index:1
 }
 
 /* ═══ CARDS ══════════════════════════════════════════════════ */
@@ -183,7 +188,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .bsm{padding:3px 9px;font-size:12px}
 
 /* ═══ FILTERS ════════════════════════════════════════════════ */
-.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters{display:flex;gap:6px;flex-wrap:wrap;-webkit-overflow-scrolling:touch}
 .chip{
   padding:4px 11px;border-radius:20px;
   border:1px solid var(--border);background:var(--surface);
@@ -207,8 +212,8 @@ select.fsel{
 }
 
 /* ═══ TABLE ══════════════════════════════════════════════════ */
-.tw{overflow-x:auto;border-radius:var(--rs)}
-table{width:100%;border-collapse:collapse;font-size:13px}
+.tw{overflow-x:auto;border-radius:var(--rs);-webkit-overflow-scrolling:touch;max-width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
 th{
   text-align:left;padding:8px 11px;
   background:#f8fafc;color:var(--muted);
@@ -228,9 +233,12 @@ tr:hover td{background:#f9fafb}
 label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 input,select,textarea{
   padding:7px 10px;border:1px solid var(--border);
-  border-radius:var(--rs);font-size:13px;color:var(--text);
+  border-radius:var(--rs);font-size:16px;color:var(--text);
   background:var(--surface);font-family:'Inter',sans-serif;
   transition:border-color .15s;width:100%
+}
+@media(min-width:769px){
+  input,select,textarea{font-size:13px}
 }
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 input:disabled,input[readonly]{background:#f8fafc;color:var(--muted)}
@@ -248,7 +256,7 @@ textarea{resize:vertical;min-height:62px}
 .meta-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:5px}
 
 /* ═══ HABITS ═════════════════════════════════════════════════ */
-.hab{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9}
+.hab{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;min-height:48px}
 .hab:last-child{border-bottom:none}
 .hchk{
   width:20px;height:20px;border-radius:5px;
@@ -258,30 +266,112 @@ textarea{resize:vertical;min-height:62px}
 }
 .hchk.done{background:var(--ok);border-color:var(--ok);color:#fff}
 
-/* ═══ CALENDAR ═══════════════════════════════════════════════ */
+/* ═══ AGENDA v2 ══════════════════════════════════════════════ */
+
+/* Tabs de vista */
 .cal-tabs{display:flex;gap:3px;background:#f1f5f9;border-radius:var(--rs);padding:3px;width:fit-content}
-.cal-tab{padding:5px 14px;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif}
+.cal-tab{padding:5px 14px;border-radius:4px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif;min-height:32px}
 .cal-tab.on{background:var(--surface);color:var(--accent);box-shadow:var(--shadow);font-weight:600}
-.wk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.wk-day{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:7px 6px;min-height:110px}
-.wk-day.today{border-color:var(--accent);background:#eff6ff}
-.wkh{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
-.wkn{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px}
+
+/* Filtros de categoria */
+.cal-filt-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  cursor:pointer;border:2px solid transparent;transition:all .15s;
+  min-height:34px;white-space:nowrap;font-family:'Inter',sans-serif
+}
+.cal-filt-btn.off{opacity:.35;filter:grayscale(.6)}
+.cal-filt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Cores de categoria */
+.cat-evento   {background:#dbeafe;color:#1d4ed8}
+.cat-tarefa   {background:#dcfce7;color:#166534}
+.cat-entrega  {background:#ede9fe;color:#5b21b6}
+.cat-financeiro{background:#fef3c7;color:#92400e}
+.cat-habito   {background:#ccfbf1;color:#0f766e}
+
+/* Vista HOJE — lista cronológica */
+.cal-hoje-wrap{display:flex;flex-direction:column;gap:6px}
+.cal-hoje-grupo{display:flex;flex-direction:column;gap:4px}
+.cal-hoje-hora{font-size:11px;font-weight:700;color:var(--muted);padding:6px 0 2px;border-bottom:1px solid #f1f5f9;text-transform:uppercase;letter-spacing:.5px}
+.cal-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 12px;border-radius:var(--rs);
+  border-left:3px solid transparent;
+  background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:box-shadow .15s;min-height:44px
+}
+.cal-item:hover{box-shadow:var(--shadow-md)}
+.cal-item-hora{font-size:11px;font-weight:700;color:var(--muted);min-width:38px;padding-top:2px;flex-shrink:0}
+.cal-item-body{flex:1;min-width:0}
+.cal-item-title{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-item-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.cal-item-badge{flex-shrink:0;margin-top:1px}
+.cal-vazia{font-size:13px;color:var(--light);padding:24px 0;text-align:center}
+.cal-vazia-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 16px;border-radius:var(--rs);background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;min-height:40px}
+
+/* Vista SEMANA */
+.wk-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.wk-grid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:5px;min-width:700px}
+.wk-day{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--rs);padding:6px 5px;
+  height:130px;overflow:hidden;display:flex;flex-direction:column
+}
+.wk-day.today{border-color:var(--accent);background:#f0f7ff}
+.wkh{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.wkn{
+  font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;
+  color:var(--navy);line-height:1;margin-bottom:5px
+}
 .wk-day.today .wkn{color:var(--accent)}
-.cev{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.et{background:var(--accent-l);color:#1d4ed8}
-.ee{background:var(--purple-bg);color:var(--purple)}
-.ef{background:var(--warn-bg);color:var(--warn)}
-.eh{background:var(--ok-bg);color:var(--ok)}
+.wk-evs{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.wk-pill{
+  height:18px;line-height:18px;
+  border-radius:3px;font-size:10px;font-weight:600;
+  padding:0 5px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;cursor:pointer;flex-shrink:0;
+  transition:opacity .15s
+}
+.wk-pill:hover{opacity:.8}
+.wk-mais{font-size:10px;color:var(--accent);cursor:pointer;font-weight:700;padding:1px 3px;margin-top:1px}
+.wk-add{
+  font-size:10px;color:var(--light);cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+  padding:2px 2px 0;margin-top:auto;transition:color .15s;
+  font-family:'Inter',sans-serif
+}
+.wk-add:hover{color:var(--accent)}
+
+/* Vista MÊS */
 .mo-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.mo-cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);min-height:66px;padding:4px 5px}
-.mo-cell.today{border-color:var(--accent)}
-.mo-n{font-weight:700;font-size:12px;color:var(--muted);margin-bottom:2px}
-.mo-cell.today .mo-n{color:var(--accent)}
+.mo-cabecalho{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.mo-cabecalho div{text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:4px 0;text-transform:uppercase}
+.mo-cell{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--rs);height:70px;padding:4px 4px;
+  overflow:hidden;cursor:pointer;transition:background .12s;
+  display:flex;flex-direction:column
+}
+.mo-cell:hover{background:#f8fafc}
+.mo-cell.today{border-color:var(--accent);background:#f0f7ff}
+.mo-cell.outro-mes{opacity:.4}
+.mo-n{font-size:11px;font-weight:700;color:var(--muted);line-height:1;margin-bottom:3px;flex-shrink:0}
+.mo-cell.today .mo-n{color:var(--accent);font-size:12px}
+.mo-evs{flex:1;overflow:hidden;display:flex;flex-direction:column;gap:1px}
+.mo-pill{
+  height:14px;line-height:14px;border-radius:2px;
+  font-size:9px;font-weight:600;padding:0 4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0
+}
+.mo-mais{font-size:9px;color:var(--accent);font-weight:700;margin-top:1px}
+/* Pontos para mês com muitos itens */
+.mo-dots{display:flex;gap:2px;margin-top:2px;flex-wrap:wrap}
+.mo-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 
 /* ═══ PROJ CARDS ═════════════════════════════════════════════ */
-#grid-proj{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.sub-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f0f4f8}
+#grid-proj{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px}
+.sub-row{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid #f0f4f8;min-height:44px}
 .sub-row:last-child{border-bottom:none}
 
 /* ═══ IMPORT / BACKUP ════════════════════════════════════════ */
@@ -307,24 +397,169 @@ textarea{resize:vertical;min-height:62px}
 .steps-list{font-size:13px;color:var(--muted);line-height:2.3;padding-left:18px}
 .steps-list b{color:var(--text)}
 
+
+/* ═══ CLIENTE CARDS ═══════════════════════════════════════════ */
+#grid-cli{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:14px}
+.cli-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:15px 17px;border-left:4px solid var(--accent)}
+.cli-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);transition:all .15s;cursor:pointer}
+.cli-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:3px}
+.cli-empresa{font-size:12px;color:var(--muted);margin-bottom:8px}
+.cli-meta{font-size:12px;background:#f8fafc;border-radius:5px;padding:6px 9px;margin-bottom:9px;color:var(--text)}
+.cli-footer{display:flex;gap:5px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* ═══ AGENDA / EVENTO ═════════════════════════════════════════ */
+/* Classes de tipo de evento — usadas no form e em futuras extensões */
+.ev-reuniao{background:#dbeafe;color:#1d4ed8}
+.ev-compromisso{background:#fce7f3;color:#9d174d}
+.ev-tarefa{background:#dcfce7;color:#166534}
+.ev-descanso{background:#f3f4f6;color:#374151}
+.ev-bloqueio{background:#fee2e2;color:#991b1b}
+.ev-pessoal{background:#ede9fe;color:#5b21b6}
+.ev-outro{background:#fef3c7;color:#92400e}
+
+
+/* Drag indicator para bottom sheet */
+@media(max-width:480px){
+  .modal::before{
+    content:'';display:block;width:36px;height:4px;
+    background:#e2e8f0;border-radius:2px;
+    margin:10px auto 4px;flex-shrink:0
+  }
+}
+
+/* ═══ BOTTOM SHEET DRAG INDICATOR ══════════════════════════ */
+@media(max-width:480px){
+  .modal::before{
+    content:'';display:block;
+    width:36px;height:4px;background:#d1d5db;
+    border-radius:2px;margin:10px auto 2px;flex-shrink:0
+  }
+}
+
+/* ═══ DESAFIOS ══════════════════════════════════════════════ */
+.dsf-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:16px 18px;border-top:4px solid var(--accent)}
+.dsf-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:var(--navy);margin-bottom:2px}
+.dsf-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
+.dsf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.dsf-stat{text-align:center;background:#f8fafc;border-radius:var(--rs);padding:8px 4px}
+.dsf-stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;color:var(--navy);line-height:1}
+.dsf-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+/* Grade de dias */
+.dsf-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:12px}
+.dsf-dia{
+  aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;cursor:pointer;transition:transform .1s;
+  border:1px solid transparent;position:relative
+}
+.dsf-dia:active{transform:scale(.9)}
+.dsf-dia.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.dsf-dia.falha{background:var(--err-bg);color:var(--err);border-color:var(--err)}
+.dsf-dia.hoje{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dsf-dia.pendente{background:#f1f5f9;color:var(--light);border-color:var(--border)}
+.dsf-dia.futuro{background:#f8fafc;color:var(--border);border-color:#f1f5f9}
+.dsf-alerta{background:var(--err-bg);color:var(--err);border-radius:var(--rs);padding:7px 10px;font-size:12px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* Legenda */
+.dsf-legenda{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.dsf-legenda span{display:flex;align-items:center;gap:4px}
+.dsf-legenda .dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+/* Indicador metabólico */
+.met-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.met-item{text-align:center;padding:10px 8px;border-radius:var(--rs);border:1px solid var(--border)}
+.met-val{font-family:'Montserrat',sans-serif;font-weight:700;font-size:18px;line-height:1;margin-bottom:3px}
+.met-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.met-ok{background:var(--ok-bg);border-color:var(--ok)}
+.met-warn{background:var(--warn-bg);border-color:var(--warn)}
+.met-err{background:var(--err-bg);border-color:var(--err)}
+
 /* ═══ ANIMATIONS ═════════════════════════════════════════════ */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* ═══ RESPONSIVE ═════════════════════════════════════════════ */
+/* ═══ TOUCH TARGETS — sempre ativos ════════════════════════════ */
+.ni{min-height:44px}
+.btn{min-height:36px}
+.hchk{min-width:28px;min-height:28px;cursor:pointer}
+.chip{min-height:36px;display:inline-flex;align-items:center;cursor:pointer}
+.ftab{min-height:36px}
+/* Scroll fluido — sempre ativo */
+#main{-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+#sidebar{-webkit-overflow-scrolling:touch}
+
+/* ═══ TABLET (≤768px) ═══════════════════════════════════════ */
 @media(max-width:768px){
+  .wk-wrap{margin:0 -2px}
+  .wk-day{min-width:100px}
   #burger{display:flex}
-  #sidebar{position:fixed;top:var(--hdr);left:0;height:calc(100vh - var(--hdr));z-index:95;transform:translateX(-100%)}
+
+  /* Sidebar como drawer */
+  #sidebar{
+    position:fixed;top:var(--hdr);left:0;
+    height:calc(100vh - var(--hdr));
+    height:calc(100dvh - var(--hdr));
+    z-index:95;transform:translateX(-100%);
+    box-shadow:4px 0 24px rgba(0,0,0,.3)
+  }
   #sidebar.open{transform:translateX(0)}
   #sov.open{display:block}
-  #main{padding:14px 14px}
-  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+
+  /* Main menos padding */
+  #main{padding:12px;gap:12px}
+
+  /* Grids responsivos */
+  .g3,.g4{grid-template-columns:1fr 1fr}
   .fg{grid-template-columns:1fr}
   .fg .full{grid-column:1/-1}
-  .wk-grid{overflow-x:auto;grid-template-columns:repeat(7,minmax(85px,1fr))}
+
+  /* Agenda semana — scroll horizontal */
+  .wk-grid{
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    grid-template-columns:repeat(7,minmax(100px,1fr));
+    padding-bottom:4px
+  }
+
+  /* Cards e textos */
+  .card{padding:12px 14px}
+  .toolbar h2{font-size:15px}
+  td,th{padding:8px 9px;font-size:12px}
+  .stat{padding:11px 13px}
+  .sval{font-size:18px}
+  .btn{font-size:13px}
 }
+
+/* ═══ MOBILE (≤480px) ═══════════════════════════════════════ */
 @media(max-width:480px){
+  /* Grids colapsar para 1 coluna */
   .g2,.g3,.g4{grid-template-columns:1fr}
+
+  /* Main ainda menos padding */
+  #main{padding:10px}
+
+  /* Modal vira bottom sheet */
+  .modal{
+    position:fixed;bottom:0;left:0;right:0;
+    width:100%;max-width:100%;
+    max-height:90vh;max-height:90dvh;
+    border-radius:16px 16px 0 0;
+    /* Evitar que fique atrás da barra home */
+    padding-bottom:env(safe-area-inset-bottom,0px)
+  }
+  .overlay{align-items:flex-end;padding:0;padding-bottom:0}
+
+  /* Toolbar empilha */
+  .toolbar{gap:8px}
+  .toolbar h2{font-size:14px}
+
+  /* Tabelas — scroll horizontal */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Formulários — 1 coluna no mobile */
+  .fg,.mbody .fg{grid-template-columns:1fr !important;gap:10px}
+  .fgrp label{font-size:12px}
+  .mbody{padding:12px 14px}
+
+  /* Botões de ação nas tabelas */
+  td .btn{padding:7px 9px;font-size:12px}
 }
 </style>
 </head>
@@ -351,7 +586,7 @@ textarea{resize:vertical;min-height:62px}
     <div class="ns">Principal</div>
     <div class="ni on" data-sec="dashboard"><span class="ic">⬡</span>Dashboard</div>
     <div class="ni" data-sec="tarefas"><span class="ic">✓</span>Tarefas</div>
-    <div class="ni" data-sec="calendario"><span class="ic">◫</span>Calendário</div>
+    <div class="ni" data-sec="calendario"><span class="ic">◫</span>Agenda</div>
 
     <div class="ns">Clientes</div>
     <div class="ni" data-sec="clientes"><span class="ic">◉</span>Clientes / CRM</div>
@@ -368,6 +603,7 @@ textarea{resize:vertical;min-height:62px}
 
     <div class="ns">Bem-estar</div>
     <div class="ni" data-sec="habitos"><span class="ic">◎</span>Hábitos</div>
+    <div class="ni" data-sec="desafios"><span class="ic">◈</span>Desafios</div>
 
     <div class="ns">Captura</div>
     <div class="ni" data-sec="ideias"><span class="ic">◌</span>Ideias Rápidas</div>
@@ -479,11 +715,9 @@ textarea{resize:vertical;min-height:62px}
     <span class="chip" onclick="filtrar('cli','ativo',this)">Ativos</span>
     <span class="chip" onclick="filtrar('cli','lead',this)">Leads</span>
     <span class="chip" onclick="filtrar('cli','pausado',this)">Pausados</span>
+    <span class="chip" onclick="filtrar('cli','finalizado',this)">Finalizados</span>
   </div>
-  <div class="card"><div class="tw"><table>
-    <thead><tr><th>Nome</th><th>Empresa</th><th>Serviço</th><th>Status</th><th>Próx. ação</th><th>Prazo</th><th></th></tr></thead>
-    <tbody id="tb-cli"></tbody>
-  </table></div></div>
+  <div id="grid-cli"></div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -573,53 +807,97 @@ textarea{resize:vertical;min-height:62px}
      HÁBITOS
 ══════════════════════════════════════════════════════════ -->
 <section id="sec-habitos" class="section">
-  <div class="toolbar"><h2>Hábitos</h2></div>
-  <div class="g2">
-    <div class="card">
-      <div class="ct">Checklist de hoje</div>
-      <div id="hab-checks"></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        <div class="fgrp" style="flex:1;min-width:80px"><label>Água (L)</label><input type="number" id="hab-agua" min="0" max="6" step="0.25" placeholder="2.0"></div>
-        <div class="fgrp" style="flex:1;min-width:80px"><label>Peso (kg)</label><input type="number" id="hab-peso" step="0.1" placeholder="—"></div>
-        <div class="fgrp" style="flex:1;min-width:80px"><label>Calorias</label><input type="number" id="hab-cal" placeholder="—"></div>
+  <div class="toolbar">
+    <h2>Hábitos</h2>
+    <button class="btn bsm" onclick="ir('config')" style="font-size:12px;color:var(--muted)">⚙ Perfil</button>
+  </div>
+
+  <!-- Indicadores metabólicos do dia -->
+  <div id="hab-meta" class="card" style="display:none"></div>
+
+  <!-- Checklist + métricas do dia -->
+  <div class="card">
+    <div class="ct">◎ Hoje — <span id="hab-data-lbl"></span></div>
+    <div id="hab-checks"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px">
+      <div class="fgrp"><label>Água (L)</label><input type="number" id="hab-agua" min="0" max="6" step="0.25" placeholder="2.0"></div>
+      <div class="fgrp"><label>Peso (kg)</label><input type="number" id="hab-peso" step="0.1" placeholder="—"></div>
+      <div class="fgrp"><label>Cal. consumidas</label><input type="number" id="hab-cal" placeholder="—"></div>
+      <div class="fgrp"><label>Cal. gastas</label><input type="number" id="hab-cal-gastas" placeholder="—"></div>
+      <div class="fgrp" style="grid-column:1/-1"><label>Atividade física</label>
+        <select id="hab-atividade">
+          <option value="">Nenhuma</option>
+          <option value="caminhada">Caminhada leve (~200 kcal)</option>
+          <option value="caminhada_rapida">Caminhada rápida (~300 kcal)</option>
+          <option value="corrida">Corrida (~450 kcal)</option>
+          <option value="musculacao">Musculação (~350 kcal)</option>
+          <option value="yoga">Yoga / Pilates (~200 kcal)</option>
+          <option value="hiit">HIIT (~500 kcal)</option>
+          <option value="bike">Ciclismo (~400 kcal)</option>
+          <option value="outro">Outro</option>
+        </select>
       </div>
-      <div class="fgrp" style="margin-top:10px"><label>Observação</label><textarea id="hab-obs" rows="2" placeholder="Como foi o dia?"></textarea></div>
-      <button class="btn bp2" style="margin-top:10px;width:100%" onclick="salvarHab()">Salvar hábitos de hoje</button>
     </div>
-    <div class="card">
-      <div class="ct">Histórico (14 dias)</div>
-      <div class="tw"><table>
-        <thead><tr><th>Data</th><th>Água</th><th>Exerc.</th><th>Alim.</th><th>Peso</th><th></th></tr></thead>
-        <tbody id="tb-hab"></tbody>
-      </table></div>
-    </div>
+    <div class="fgrp" style="margin-top:10px"><label>Observação</label><textarea id="hab-obs" rows="2" placeholder="Como foi o dia?"></textarea></div>
+    <button class="btn bp2" style="margin-top:12px;width:100%" onclick="salvarHab()">Salvar hábitos de hoje</button>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card">
+    <div class="ct">Histórico (14 dias)</div>
+    <div class="tw"><table>
+      <thead><tr><th>Data</th><th>Água</th><th>Exerc.</th><th>Alim.</th><th>Peso</th><th>Cal.</th><th>Saldo</th><th></th></tr></thead>
+      <tbody id="tb-hab"></tbody>
+    </table></div>
   </div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════
-     CALENDÁRIO
+     CALENDÁRIO / AGENDA
 ══════════════════════════════════════════════════════════ -->
 <section id="sec-calendario" class="section">
+
+  <!-- Toolbar: título + navegação + botão novo evento -->
   <div class="toolbar">
-    <h2>Calendário</h2>
-    <div style="display:flex;gap:6px;align-items:center" id="cal-nav">
+    <h2>Agenda</h2>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap" id="cal-nav">
       <button class="btn bsm" onclick="calMov(-1)">←</button>
-      <span id="cal-lbl" style="font-weight:600;font-size:13px;min-width:160px;text-align:center"></span>
+      <span id="cal-lbl" style="font-weight:600;font-size:13px;min-width:130px;text-align:center"></span>
       <button class="btn bsm" onclick="calMov(1)">→</button>
+      <button class="btn bp2 bsm" onclick="abrirModal('evento')">+ Evento</button>
     </div>
   </div>
-  <div class="cal-tabs">
-    <button class="cal-tab" onclick="calVista('hoje',this)">Hoje</button>
-    <button class="cal-tab on" onclick="calVista('semana',this)">Semana</button>
-    <button class="cal-tab" onclick="calVista('mes',this)">Mês</button>
+
+  <!-- Tabs de vista -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+    <div class="cal-tabs">
+      <button class="cal-tab" onclick="calVista('hoje',this)">Hoje</button>
+      <button class="cal-tab on" onclick="calVista('semana',this)">Semana</button>
+      <button class="cal-tab" onclick="calVista('mes',this)">Mês</button>
+    </div>
   </div>
+
+  <!-- Filtros por categoria — Google Agenda style -->
+  <div id="cal-filtros" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+
+  <!-- Corpo do calendário -->
   <div id="cal-body"></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:11px">
-    <span class="badge bb">■ Tarefa</span>
-    <span class="badge bp">■ Entrega</span>
-    <span class="badge by">■ Financeiro</span>
-    <span class="badge bk">■ Hábito</span>
+
+  <!-- Legenda de cores -->
+  <div id="cal-legenda" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--muted)"></div>
+
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     DESAFIOS
+══════════════════════════════════════════════════════════ -->
+<section id="sec-desafios" class="section">
+  <div class="toolbar">
+    <h2>Desafios</h2>
+    <button class="btn bp2" onclick="abrirModal('desafio')">+ Novo desafio</button>
   </div>
+  <div id="grid-desafios"></div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -654,6 +932,35 @@ textarea{resize:vertical;min-height:62px}
     </div>
     <button class="btn bp2" style="margin-top:12px" onclick="salvarCfg()">Salvar</button>
   </div>
+
+  <!-- Perfil metabólico -->
+  <div class="card" style="max-width:500px">
+    <div class="ct">◈ Perfil metabólico</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Usado para calcular seu gasto calórico basal e meta diária.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fgrp"><label>Altura (cm)</label><input type="number" id="cfg-altura" placeholder="ex: 165"></div>
+      <div class="fgrp"><label>Peso de referência (kg)</label><input type="number" step="0.1" id="cfg-peso-ref" placeholder="ex: 65"></div>
+      <div class="fgrp"><label>Idade</label><input type="number" id="cfg-idade" placeholder="ex: 30"></div>
+      <div class="fgrp"><label>Sexo</label>
+        <select id="cfg-sexo">
+          <option value="feminino">Feminino</option>
+          <option value="masculino">Masculino</option>
+        </select>
+      </div>
+      <div class="fgrp" style="grid-column:1/-1"><label>Nível de atividade</label>
+        <select id="cfg-atividade">
+          <option value="sedentario">Sedentário (sem exercício)</option>
+          <option value="leve">Leve (1-3x/semana)</option>
+          <option value="moderado">Moderado (3-5x/semana)</option>
+          <option value="ativo">Ativo (6-7x/semana)</option>
+          <option value="muito_ativo">Muito ativo (atleta / 2x/dia)</option>
+        </select>
+      </div>
+    </div>
+    <div id="cfg-tmb-preview" style="font-size:13px;color:var(--muted);margin-top:10px;padding:8px 12px;background:#f8fafc;border-radius:var(--rs)"></div>
+    <button class="btn bp2" style="margin-top:12px" onclick="salvarCfgPerfil()">Salvar perfil</button>
+  </div>
+
   <div id="cfg-listas" class="g2"></div>
 </section>
 
@@ -780,7 +1087,7 @@ textarea{resize:vertical;min-height:62px}
 </div><!-- /app -->
 
 <!-- FAB -->
-<button id="fab" onclick="abrirCaptura()" title="Captura rápida (tecla N)">+</button>
+<button id="fab" onclick="_fabAction()" title="Ação rápida (tecla N)">+</button>
 <div id="toast"></div>
 
 <!-- MODAL UNIVERSAL -->
@@ -818,10 +1125,18 @@ const DB = {
   planoFin: [],      // UNIFICADO: pessoal + empresa
   habitos: [],
   ideias: [],
+  eventos: [],
+  desafios: [],
   config: {
     sheets_url: '',
     nome_usuario: 'YM',
     meta_vendas: 5000,
+    // Perfil metabólico
+    altura_cm: 0,
+    peso_ref: 0,
+    idade: 0,
+    sexo: 'feminino',
+    nivel_atividade: 'moderado',
     STATUS_TAREFAS: ['pendente','em andamento','aguardando retorno','concluida','cancelada'],
     STATUS_CLIENTES: ['lead','ativo','aguardando retorno','em execucao','finalizado','pausado'],
     STATUS_FIN: ['previsto','concluido','cancelado'],
@@ -835,7 +1150,7 @@ const DB = {
 
 // Arrays sincronizáveis com Sheets
 const SYNC_KEYS = ['tarefas','clientes','subtarefas','entregas','projetos',
-                   'subtarefasProj','financeiro','planoFin','habitos','ideias'];
+                   'subtarefasProj','financeiro','planoFin','habitos','ideias','eventos','desafios'];
 
 // ──────────────────────────────────────────────────────────────
 // ESTADO DA UI
@@ -1020,20 +1335,46 @@ function popProjSel(id) {
 // ──────────────────────────────────────────────────────────────
 // NAVEGAÇÃO
 // ──────────────────────────────────────────────────────────────
-function ir(id) {
+// ── NAVEGAÇÃO SPA COM HISTÓRICO ──────────────────────────────
+let _navStack = ['dashboard'];
+
+function ir(id, addHistory = true) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   const sec=$('sec-'+id); if(sec) sec.classList.add('active');
   const ni=document.querySelector(`.ni[data-sec="${id}"]`); if(ni) ni.classList.add('on');
   sidebarClose();
   renderSec(id);
+  updateFAB(id);
+  // Adiciona ao histórico do browser para botão voltar nativo funcionar
+  if(addHistory) {
+    history.pushState({ sec: id }, '', '#' + id);
+    _navStack.push(id);
+    if(_navStack.length > 20) _navStack.shift();
+  }
 }
+
+// Intercepta botão voltar do browser/celular
+window.addEventListener('popstate', function(e) {
+  const sec = e.state && e.state.sec;
+  if(sec) {
+    ir(sec, false);
+  } else {
+    // Volta para a seção anterior na stack
+    if(_navStack.length > 1) {
+      _navStack.pop();
+      const prev = _navStack[_navStack.length - 1];
+      ir(prev, false);
+      history.pushState({ sec: prev }, '', '#' + prev);
+    }
+  }
+});
 function renderSec(id) {
   const m = {
     dashboard:renderDash, tarefas:renderTarefas, clientes:renderClientes,
     subtarefas:renderSubtarefas, entregas:renderEntregas, projetos:renderProjetos,
     subproj:renderSubProj, financeiro:renderFinanceiro, plano:renderPlano,
-    habitos:renderHabitos, calendario:renderCalendario, ideias:renderIdeias,
+    habitos:renderHabitos, desafios:renderDesafios, calendario:renderCalendario, ideias:renderIdeias,
     config:renderConfig, sheets:renderSheets, importar:renderImportar, backup:renderBackup
   };
   if(m[id]) m[id]();
@@ -1041,6 +1382,38 @@ function renderSec(id) {
 
 function sidebarToggle() { $('sidebar').classList.toggle('open'); $('sov').classList.toggle('open'); }
 function sidebarClose() { $('sidebar').classList.remove('open'); $('sov').classList.remove('open'); }
+
+
+// ── FAB CONTEXTUAL ────────────────────────────────────────────
+const FAB_MAP = {
+  dashboard:  { label: '+',            action: () => abrirCaptura() },
+  tarefas:    { label: '+ Tarefa',     action: () => abrirModal('tarefa') },
+  clientes:   { label: '+ Cliente',    action: () => abrirModal('cliente') },
+  subtarefas: { label: '+ Subtarefa',  action: () => abrirModal('subtarefa') },
+  entregas:   { label: '+ Entrega',    action: () => abrirModal('entrega') },
+  projetos:   { label: '+ Projeto',    action: () => abrirModal('projeto') },
+  subproj:    { label: '+ Subtarefa',  action: () => abrirModal('subproj') },
+  financeiro: { label: '+ Lançamento', action: () => abrirModal('financeiro') },
+  plano:      { label: '+ Ação',       action: () => abrirModal('plano') },
+  habitos:    { label: '+ Hábito',     action: () => abrirModal('habito') },
+  desafios:   { label: '+ Desafio',    action: () => abrirModal('desafio') },
+  calendario: { label: '+ Evento',     action: () => abrirModal('evento') },
+  ideias:     { label: '+ Captura',    action: () => abrirCaptura() },
+  config: null, sheets: null, importar: null, backup: null,
+};
+let _fabAction = () => abrirCaptura();
+function updateFAB(sec) {
+  const fab = $('fab'); if(!fab) return;
+  const cfg = FAB_MAP[sec];
+  if(!cfg) { fab.style.display='none'; return; }
+  fab.style.display = 'flex';
+  const long = cfg.label && cfg.label.length > 1;
+  fab.textContent = cfg.label;
+  fab.style.cssText += long
+    ? ';font-size:13px;font-weight:700;width:auto;border-radius:25px;padding:0 18px;height:48px;min-height:48px'
+    : ';font-size:26px;font-weight:400;width:50px;border-radius:50%;padding:0;height:50px;min-height:50px';
+  _fabAction = cfg.action;
+}
 
 // ──────────────────────────────────────────────────────────────
 // DASHBOARD
@@ -1084,6 +1457,9 @@ function renderDash() {
   `);
 
   // Hábitos
+  const metaDiaD = calcMeta();
+  const calD = Number(habHj.calorias||0), gasD = Number(habHj.calorias_gastas||ATIV_KCAL[habHj.atividade]||0);
+  const saldoD = metaDiaD > 0 && calD > 0 ? calD-(metaDiaD+gasD) : null;
   R('d-hab', habKeys.map((k,i)=>{
     const lb = ['Exercício','Alimentação saudável','Meditação','Sem álcool'][i];
     const ok = boolTrue(habHj[k]);
@@ -1091,7 +1467,7 @@ function renderDash() {
       <div class="hchk ${ok?'done':''}" onclick="toggleHabRap('${k}')">${ok?'✓':''}</div>
       <span style="font-size:13px">${lb}</span>
     </div>`;
-  }).join('') + (habHj.agua?`<div style="font-size:11px;color:var(--muted);margin-top:6px">💧 ${habHj.agua}L${habHj.peso?' · ⚖ '+habHj.peso+'kg':''}</div>`:''));
+  }).join('') + (habHj.agua?`<div style="font-size:11px;color:var(--muted);margin-top:6px">💧 ${habHj.agua}L${habHj.peso?' · ⚖ '+habHj.peso+'kg':''}</div>`:'') + (saldoD!==null?`<div style="font-size:11px;margin-top:4px;font-weight:600;color:${saldoD>200?'var(--err)':saldoD<-200?'var(--info)':'var(--ok)'}">Cal: ${saldoD>0?'+'+saldoD:saldoD} kcal</div>`:''));
 
   // Rotina
   const rot = DB.tarefas.filter(t=>t.area==='ROTINA'&&ehHoje(t.vencimento)&&t.status!=='concluida');
@@ -1228,23 +1604,76 @@ function concluirTar(id) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// CLIENTES
+// CLIENTES (cards — mesmo padrão visual dos projetos)
 // ──────────────────────────────────────────────────────────────
 function renderClientes() { refCli(); }
 function refCli() {
   let d = [...DB.clientes];
   const f = _filt.cli;
-  if(f!=='todos') d = d.filter(c=>c.status===f);
-  R('tb-cli', d.length ? d.map(c=>`<tr>
-    <td style="font-weight:500">${c.nome||'—'}</td>
-    <td style="font-size:12px">${c.empresa||'—'}</td>
-    <td style="font-size:12px">${c.servico||'—'}</td>
-    <td>${badgeStatus(c.status)}</td>
-    <td style="font-size:12px;max-width:160px">${c.proxima_acao||'—'}</td>
-    <td style="font-size:12px;color:${atrasado(c.prazo_entrega)?'var(--err)':'var(--muted)'}">${fmtData(c.prazo_entrega)}</td>
-    <td>${acoes('cliente',c.id)}</td>
-  </tr>`).join('') : vazio('Nenhum cliente.'));
+  if(f !== 'todos') d = d.filter(c => c.status === f);
+
+  const grid = $('grid-cli');
+  if(!grid) return;
+
+  if(!d.length) {
+    grid.innerHTML = '<div class="card empty"><div class="ei">👥</div><p>Nenhum cliente encontrado.</p></div>';
+    return;
+  }
+
+  // Cor da borda por status
+  const borderColor = {
+    ativo: 'var(--ok)', lead: 'var(--accent)',
+    'em execucao': 'var(--warn)', pausado: 'var(--light)',
+    finalizado: 'var(--muted)', 'aguardando retorno': 'var(--warn)'
+  };
+
+  grid.innerHTML = d.map(cli => {
+    const subs  = DB.subtarefas.filter(s => s.cliente_id === cli.id);
+    const ents  = DB.entregas.filter(e => e.cliente_id === cli.id && e.status !== 'concluida' && e.status !== 'cancelada');
+    const cor   = borderColor[cli.status] || 'var(--accent)';
+    const late  = atrasado(cli.prazo_entrega);
+
+    return `<div class="cli-card" style="border-left-color:${cor}" onclick="abrirModal('cliente','${cli.id}')">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px">
+        <div>
+          <div class="cli-name">${cli.nome || '—'}</div>
+          <div class="cli-empresa">${cli.empresa ? '🏢 ' + cli.empresa : ''}${cli.servico ? ' · ' + cli.servico : ''}</div>
+        </div>
+        <div style="display:flex;gap:3px" onclick="event.stopPropagation()">
+          <button class="btn bsm" onclick="abrirModal('cliente','${cli.id}')">✎</button>
+          <button class="btn bsm bd" onclick="excluir('cliente','${cli.id}')">✕</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+        ${badgeStatus(cli.status)}
+        ${cli.whatsapp ? `<a href="https://wa.me/${cli.whatsapp.replace(/\D/g,'')}" target="_blank" onclick="event.stopPropagation()" style="text-decoration:none">${badge('WhatsApp','bk')}</a>` : ''}
+      </div>
+
+      ${cli.proxima_acao ? `<div class="cli-meta">📌 <b>Próx. ação:</b> ${cli.proxima_acao}</div>` : ''}
+
+      <div style="display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:8px;flex-wrap:wrap">
+        ${cli.prazo_entrega ? `<span style="color:${late ? 'var(--err)' : 'var(--muted)'}">📅 ${fmtData(cli.prazo_entrega)}${late ? ' ⚠' : ''}</span>` : ''}
+        ${ents.length ? `<span>📦 ${ents.length} entrega${ents.length > 1 ? 's' : ''} em aberto</span>` : ''}
+        ${subs.length ? `<span>◈ ${subs.length} subtarefa${subs.length > 1 ? 's' : ''}</span>` : ''}
+      </div>
+
+      <div class="cli-footer">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${cli.email ? `<a href="mailto:${cli.email}" target="_blank" onclick="event.stopPropagation()" class="btn bsm" style="text-decoration:none;font-size:11px">✉</a>` : ''}
+          ${cli.instagram ? `<a href="https://instagram.com/${cli.instagram.replace('@','')}" target="_blank" onclick="event.stopPropagation()" class="btn bsm" style="text-decoration:none;font-size:11px">Ig</a>` : ''}
+        </div>
+        <button class="btn bsm" onclick="event.stopPropagation();novaSubCli('${cli.id}')">+ Subtarefa</button>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+function novaSubCli(cliId) {
+  _presetCliId = cliId;
+  abrirModal('subtarefa');
+}
+let _presetCliId = null;
 
 // ──────────────────────────────────────────────────────────────
 // SUBTAREFAS CLIENTES
@@ -1470,112 +1899,607 @@ function refPla() {
   </tr>`).join('') : vazio('Nenhuma ação financeira.'));
 }
 
-// ──────────────────────────────────────────────────────────────
-// HÁBITOS
-// ──────────────────────────────────────────────────────────────
-function renderHabitos() {
-  const hj = hoje(), habHj = DB.habitos.find(h=>h.data===hj)||{};
-  const ks = [
-    {k:'exercicio',lb:'Exercício'},
-    {k:'alimentacao',lb:'Alimentação saudável'},
-    {k:'meditacao',lb:'Meditação / Offline'},
-    {k:'alcool_nao',lb:'Sem álcool'}
-  ];
-  R('hab-checks', ks.map(({k,lb})=>{
-    const ok = boolTrue(habHj[k]);
-    return `<div class="hab"><div class="hchk ${ok?'done':''}" onclick="toggleHab('${k}',this)">${ok?'✓':''}</div><span style="font-size:13px">${lb}</span></div>`;
-  }).join(''));
-  if(habHj.agua) $('hab-agua').value=habHj.agua;
-  if(habHj.peso) $('hab-peso').value=habHj.peso;
-  if(habHj.calorias) $('hab-cal').value=habHj.calorias;
-  if(habHj.obs) $('hab-obs').value=habHj.obs;
 
-  const hist = [...DB.habitos].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,14);
-  R('tb-hab', hist.length ? hist.map(h=>`<tr>
-    <td>${fmtData(h.data)}</td>
-    <td>${h.agua?h.agua+'L':'—'}</td>
-    <td>${boolTrue(h.exercicio)?badge('✓','bk'):badge('—','bg')}</td>
-    <td>${boolTrue(h.alimentacao)?badge('✓','bk'):badge('—','bg')}</td>
-    <td>${h.peso?h.peso+'kg':'—'}</td>
-    <td>${acoes('habito',h.id)}</td>
-  </tr>`).join('') : vazio('Sem histórico de hábitos.'));
+// ──────────────────────────────────────────────────────────────
+// HÁBITOS — com cálculo metabólico real
+// ──────────────────────────────────────────────────────────────
+
+// Atividades e calorias gastas estimadas/hora de esforço
+const ATIV_KCAL = {
+  caminhada: 200, caminhada_rapida: 300, corrida: 450,
+  musculacao: 350, yoga: 200, hiit: 500, bike: 400, outro: 250
+};
+
+// Harris-Benedict revisado
+// Retorna TMB (kcal/dia) ou 0 se perfil incompleto
+function calcTMB() {
+  const cfg = DB.config;
+  const p = Number(cfg.peso_ref), a = Number(cfg.altura_cm), i = Number(cfg.idade);
+  if(!p || !a || !i) return 0;
+  if(cfg.sexo === 'masculino')
+    return Math.round(88.362 + 13.397*p + 4.799*a - 5.677*i);
+  else
+    return Math.round(447.593 + 9.247*p + 3.098*a - 4.330*i);
 }
-function toggleHab(k,el){
-  const hj=hoje(); let h=DB.habitos.find(h=>h.data===hj);
-  if(!h){h={id:uid(),data:hj};DB.habitos.push(h);}
-  h[k]=!boolTrue(h[k]);
-  el.classList.toggle('done',boolTrue(h[k]));
-  el.textContent=boolTrue(h[k])?'✓':'';
+
+// Fator de atividade sobre TMB
+const ATIV_FATOR = {
+  sedentario: 1.2, leve: 1.375, moderado: 1.55, ativo: 1.725, muito_ativo: 1.9
+};
+
+function calcMeta() {
+  const tmb = calcTMB();
+  if(!tmb) return 0;
+  return Math.round(tmb * (ATIV_FATOR[DB.config.nivel_atividade] || 1.55));
+}
+
+function renderHabitos() {
+  const hj = hoje(), habHj = DB.habitos.find(h => h.data === hj) || {};
+  const tmb = calcTMB(), metaDia = calcMeta();
+
+  // Atualizar label da data
+  const lbl = $('hab-data-lbl');
+  if(lbl) lbl.textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+
+  // Painel metabólico (só mostra se perfil configurado)
+  const metaEl = $('hab-meta');
+  if(metaEl) {
+    if(tmb > 0) {
+      const calCons = Number(habHj.calorias || 0);
+      const calGast = Number(habHj.calorias_gastas || ATIV_KCAL[habHj.atividade] || 0);
+      const saldo   = calCons - (metaDia + calGast);
+      const saldoOk = Math.abs(saldo) < 200;
+      const saldoStr = saldo > 0 ? '+' + saldo + ' kcal (superávit)' : saldo < 0 ? saldo + ' kcal (déficit)' : '0 kcal (equilibrado)';
+
+      metaEl.style.display = 'block';
+      metaEl.innerHTML = `
+        <div class="ct">◈ Balanço calórico de hoje</div>
+        <div class="met-bar">
+          <div class="met-item">
+            <div class="met-val">${metaDia}</div>
+            <div class="met-lbl">Meta diária</div>
+          </div>
+          <div class="met-item ${calCons > 0 ? (calCons > metaDia*1.2 ? 'met-err' : 'met-ok') : ''}">
+            <div class="met-val">${calCons || '—'}</div>
+            <div class="met-lbl">Consumidas</div>
+          </div>
+          <div class="met-item ${saldoOk ? 'met-ok' : saldo > 0 ? 'met-warn' : 'met-err'}">
+            <div class="met-val" style="font-size:14px">${calCons > 0 ? saldoStr : '—'}</div>
+            <div class="met-lbl">Saldo estimado</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">TMB: ${tmb} kcal · Gasto estimado: ${calGast} kcal</div>`;
+    } else {
+      metaEl.style.display = 'block';
+      metaEl.innerHTML = `<div style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px">
+        <span>⚙</span>
+        <span>Configure seu <b>perfil metabólico</b> em Configurações para ver o balanço calórico.</span>
+        <button class="btn bsm" onclick="ir('config')">Configurar</button>
+      </div>`;
+    }
+  }
+
+  // Checklist
+  const ks = [
+    { k:'exercicio',    lb:'Exercício' },
+    { k:'alimentacao',  lb:'Alimentação saudável' },
+    { k:'meditacao',    lb:'Meditação / Offline' },
+    { k:'alcool_nao',   lb:'Sem álcool' },
+  ];
+  R('hab-checks', ks.map(({k,lb}) => {
+    const ok = boolTrue(habHj[k]);
+    return `<div class="hab">
+      <div class="hchk ${ok?'done':''}" onclick="toggleHab('${k}',this)">${ok?'✓':''}</div>
+      <span style="font-size:14px">${lb}</span>
+    </div>`;
+  }).join(''));
+
+  // Preencher campos
+  if(habHj.agua)            $('hab-agua').value = habHj.agua;
+  if(habHj.peso)            $('hab-peso').value = habHj.peso;
+  if(habHj.calorias)        $('hab-cal').value  = habHj.calorias;
+  if(habHj.calorias_gastas) $('hab-cal-gastas').value = habHj.calorias_gastas;
+  if(habHj.atividade)       $('hab-atividade').value  = habHj.atividade;
+  if(habHj.obs)             $('hab-obs').value  = habHj.obs;
+
+  // Histórico
+  const hist = [...DB.habitos].sort((a,b) => b.data.localeCompare(a.data)).slice(0,14);
+  R('tb-hab', hist.length ? hist.map(h => {
+    const cons = Number(h.calorias || 0);
+    const gast = Number(h.calorias_gastas || ATIV_KCAL[h.atividade] || 0);
+    const meta = calcMeta();
+    const saldo = meta > 0 && cons > 0 ? cons - (meta + gast) : null;
+    const saldoBadge = saldo !== null
+      ? badge(saldo > 0 ? '+'+saldo : String(saldo), saldo > 200 ? 'br' : saldo < -200 ? 'bb' : 'bk')
+      : '—';
+    return `<tr>
+      <td>${fmtData(h.data)}</td>
+      <td>${h.agua ? h.agua+'L' : '—'}</td>
+      <td>${boolTrue(h.exercicio) ? badge('✓','bk') : badge('—','bg')}</td>
+      <td>${boolTrue(h.alimentacao) ? badge('✓','bk') : badge('—','bg')}</td>
+      <td>${h.peso ? h.peso+'kg' : '—'}</td>
+      <td style="font-size:12px">${cons ? cons+' kcal' : '—'}</td>
+      <td>${saldoBadge}</td>
+      <td>${acoes('habito',h.id)}</td>
+    </tr>`;
+  }).join('') : vazio('Sem histórico de hábitos.'));
+}
+
+function toggleHab(k, el) {
+  const hj = hoje();
+  let h = DB.habitos.find(h => h.data === hj);
+  if(!h) { h = {id:uid(), data:hj}; DB.habitos.push(h); }
+  h[k] = !boolTrue(h[k]);
+  el.classList.toggle('done', boolTrue(h[k]));
+  el.textContent = boolTrue(h[k]) ? '✓' : '';
   salvarLocal();
 }
-function salvarHab(){
-  const hj=hoje(); let h=DB.habitos.find(h=>h.data===hj);
-  if(!h){h={id:uid(),data:hj};DB.habitos.push(h);}
-  h.agua=$('hab-agua').value; h.peso=$('hab-peso').value;
-  h.calorias=$('hab-cal').value; h.obs=$('hab-obs').value;
-  salvarLocal(); showToast('Hábitos salvos!'); renderHabitos();
+
+function salvarHab() {
+  const hj = hoje();
+  let h = DB.habitos.find(h => h.data === hj);
+  if(!h) { h = {id:uid(), data:hj}; DB.habitos.push(h); }
+  h.agua            = $('hab-agua').value;
+  h.peso            = $('hab-peso').value;
+  h.calorias        = $('hab-cal').value;
+  h.calorias_gastas = $('hab-cal-gastas').value;
+  h.atividade       = $('hab-atividade').value;
+  h.obs             = $('hab-obs').value;
+  salvarLocal();
+  showToast('Hábitos salvos!');
+  renderHabitos();
 }
+
 
 // ──────────────────────────────────────────────────────────────
 // CALENDÁRIO
 // ──────────────────────────────────────────────────────────────
-function calVista(v,el){ _calVista=v; _calOff=0; document.querySelectorAll('.cal-tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); $('cal-nav').style.display=v==='hoje'?'none':'flex'; renderCalendario(); }
-function calMov(d){ _calOff+=d; renderCalendario(); }
-function renderCalendario(){
-  if(_calVista==='hoje') renderCalHoje();
-  else if(_calVista==='semana') renderCalSemana();
-  else renderCalMes();
+
+
+// ──────────────────────────────────────────────────────────────
+// AGENDA v2 — filtros por categoria + vistas redesenhadas
+// ──────────────────────────────────────────────────────────────
+
+// Tipos de evento e classes CSS
+const TIPOS_EVENTO = ['reuniao','compromisso','tarefa','descanso','bloqueio','pessoal','outro'];
+const TIPO_EV_LABEL = {
+  reuniao:'Reunião', compromisso:'Compromisso', tarefa:'Tarefa',
+  descanso:'Descanso', bloqueio:'Bloqueio', pessoal:'Pessoal', outro:'Outro'
+};
+
+// Categorias com cor e ícone
+const CAT = {
+  evento:     { label:'Eventos',    cor:'#1d4ed8', bg:'#dbeafe', cls:'cat-evento',    ic:'●' },
+  tarefa:     { label:'Tarefas',    cor:'#166534', bg:'#dcfce7', cls:'cat-tarefa',    ic:'✓' },
+  entrega:    { label:'Entregas',   cor:'#5b21b6', bg:'#ede9fe', cls:'cat-entrega',   ic:'📦' },
+  financeiro: { label:'Financeiro', cor:'#92400e', bg:'#fef3c7', cls:'cat-financeiro',ic:'◊' },
+  habito:     { label:'Hábitos',    cor:'#0f766e', bg:'#ccfbf1', cls:'cat-habito',    ic:'◎' },
+};
+
+// Estado dos filtros — persiste na sessão
+let _calFiltros = { evento:true, tarefa:true, entrega:true, financeiro:false, habito:false };
+
+// ── Controle de vista ─────────────────────────────────────────
+function calVista(v, el) {
+  _calVista = v; _calOff = 0;
+  document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('on'));
+  if(el) el.classList.add('on');
+  const nav = $('cal-nav');
+  if(nav) nav.style.display = v === 'hoje' ? 'none' : 'flex';
+  renderCalendario();
 }
-function evsDia(ds){
-  const ev=[];
-  DB.tarefas.filter(t=>t.vencimento===ds).forEach(t=>ev.push({l:t.titulo,c:'et'}));
-  DB.entregas.filter(e=>e.prazo_entrega===ds).forEach(e=>ev.push({l:e.tipo_entrega,c:'ee'}));
-  DB.financeiro.filter(f=>f.data===ds&&f.status==='previsto').forEach(f=>ev.push({l:f.descricao,c:'ef'}));
-  const hb=DB.habitos.find(h=>h.data===ds);
-  if(hb&&boolTrue(hb.exercicio)) ev.push({l:'Hábitos ✓',c:'eh'});
+function calMov(d) { _calOff += d; renderCalendario(); }
+
+function renderCalendario() {
+  renderFiltros();
+  renderLegenda();
+  if(_calVista === 'hoje')        renderCalHoje();
+  else if(_calVista === 'semana') renderCalSemana();
+  else                            renderCalMes();
+}
+
+// ── Filtros ───────────────────────────────────────────────────
+function renderFiltros() {
+  const el = $('cal-filtros'); if(!el) return;
+  el.innerHTML = Object.entries(CAT).map(([key, cat]) => {
+    const on = _calFiltros[key];
+    return `<button class="cal-filt-btn ${on ? '' : 'off'}"
+      style="background:${on ? cat.bg : '#f1f5f9'};color:${on ? cat.cor : 'var(--muted)'}; border-color:${on ? cat.cor+'44' : 'transparent'}"
+      onclick="toggleFiltro('${key}')">
+      <span class="cal-filt-dot" style="background:${cat.cor}"></span>
+      ${cat.label}
+    </button>`;
+  }).join('');
+}
+function toggleFiltro(cat) {
+  _calFiltros[cat] = !_calFiltros[cat];
+  renderCalendario();
+}
+
+function renderLegenda() {
+  const el = $('cal-legenda'); if(!el) return;
+  const ativos = Object.entries(CAT).filter(([k]) => _calFiltros[k]);
+  el.innerHTML = ativos.map(([,cat]) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px">
+      <span style="width:10px;height:10px;border-radius:2px;background:${cat.bg};border:1px solid ${cat.cor};display:inline-block"></span>
+      <span style="color:${cat.cor};font-weight:600">${cat.label}</span>
+    </span>`
+  ).join('');
+}
+
+// ── Coleta eventos de um dia com categoria ────────────────────
+function evsDia(ds) {
+  const ev = [];
+  if(_calFiltros.tarefa)
+    DB.tarefas.filter(t => t.vencimento === ds)
+      .forEach(t => ev.push({ cat:'tarefa', titulo:t.titulo, sub: t.area||'', hora:'', id:t.id, tipo:'tarefa' }));
+  if(_calFiltros.entrega)
+    DB.entregas.filter(e => e.prazo_entrega === ds)
+      .forEach(e => ev.push({ cat:'entrega', titulo:(e.tipo_entrega||'Entrega'), sub: '', hora:'', id:e.id, tipo:'entrega' }));
+  if(_calFiltros.financeiro)
+    DB.financeiro.filter(f => f.data === ds && f.status === 'previsto')
+      .forEach(f => ev.push({ cat:'financeiro', titulo:f.descricao, sub: moeda(f.valor_bruto), hora:'', id:f.id, tipo:'fin' }));
+  if(_calFiltros.habito) {
+    const hb = DB.habitos.find(h => h.data === ds);
+    if(hb) {
+      const ks = ['exercicio','alimentacao','meditacao','alcool_nao'];
+      const feitos = ks.filter(k => boolTrue(hb[k])).length;
+      ev.push({ cat:'habito', titulo:`Hábitos ${feitos}/${ks.length}`, sub:'', hora:'', id:hb.id, tipo:'hab' });
+    }
+  }
+  if(_calFiltros.evento)
+    (DB.eventos||[]).filter(e => e.data === ds)
+      .sort((a,b) => (a.hora_inicio||'').localeCompare(b.hora_inicio||''))
+      .forEach(e => ev.push({ cat:'evento', titulo:e.titulo, sub:TIPO_EV_LABEL[e.tipo]||'', hora:e.hora_inicio?e.hora_inicio.slice(0,5):'', hora_fim:e.hora_fim?e.hora_fim.slice(0,5):'', id:e.id, tipo:'evento' }));
+  // Ordenar: eventos com hora primeiro, depois sem hora
+  ev.sort((a,b) => {
+    if(a.hora && !b.hora) return -1;
+    if(!a.hora && b.hora) return 1;
+    return (a.hora||'').localeCompare(b.hora||'');
+  });
   return ev;
 }
-function renderCalHoje(){
-  const n=new Date(), ds=hoje();
-  $('cal-lbl') && ($('cal-lbl').textContent='');
-  const evs=evsDia(ds);
-  R('cal-body',`<div class="card"><div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:24px;color:var(--navy);margin-bottom:3px">${n.getDate()}</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">${n.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
-    ${evs.length?evs.map(e=>`<div class="cev ${e.c}" style="white-space:normal;font-size:13px;padding:5px 9px;margin-bottom:5px">${e.l}</div>`).join(''):'<p style="color:var(--light);font-size:13px">Nenhum evento para hoje.</p>'}
-  </div>`);
+
+// ── VISTA HOJE ─────────────────────────────────────────────────
+function renderCalHoje() {
+  const n = new Date(), ds = hoje();
+  if($('cal-lbl')) $('cal-lbl').textContent = '';
+  const evs = evsDia(ds);
+
+  if(!evs.length) {
+    R('cal-body', `<div class="card cal-vazia">
+      <div style="font-size:28px;margin-bottom:8px">📅</div>
+      <div>Nenhum item para hoje com os filtros atuais.</div>
+      <button class="cal-vazia-btn" onclick="abrirModal('evento')">+ Novo evento</button>
+    </div>`);
+    return;
+  }
+
+  // Agrupar por hora
+  const comHora = evs.filter(e => e.hora);
+  const semHora = evs.filter(e => !e.hora);
+
+  // Cabeçalho do dia
+  const dataStr = n.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  const dataFormatada = dataStr.charAt(0).toUpperCase() + dataStr.slice(1);
+
+  let html = `<div class="card" style="padding:14px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--navy);line-height:1">${n.getDate()}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px">${dataFormatada}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Montserrat',sans-serif;font-size:20px;font-weight:700;color:var(--accent)">${evs.length}</div>
+        <div style="font-size:11px;color:var(--muted)">item${evs.length>1?'s':''}</div>
+      </div>
+    </div>
+    <div class="cal-hoje-wrap">`;
+
+  // Items com hora
+  if(comHora.length) {
+    html += `<div class="cal-hoje-hora">Com horário</div>`;
+    comHora.forEach(ev => { html += renderCalItem(ev); });
+  }
+
+  // Items sem hora
+  if(semHora.length) {
+    html += `<div class="cal-hoje-hora" style="margin-top:${comHora.length?8:0}px">Sem horário fixo</div>`;
+    semHora.forEach(ev => { html += renderCalItem(ev); });
+  }
+
+  html += `</div>
+    <button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="abrirModal('evento')">+ Novo evento</button>
+  </div>`;
+
+  R('cal-body', html);
 }
-function renderCalSemana(){
-  const n=new Date(), seg=new Date(n); seg.setDate(n.getDate()-n.getDay()+1+(_calOff*7));
-  const dias=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-  const cells=Array.from({length:7},(_,i)=>{const d=new Date(seg);d.setDate(seg.getDate()+i);return d;});
-  if($('cal-lbl')) $('cal-lbl').textContent=`${cells[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} — ${cells[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}`;
-  const hj=hoje();
-  R('cal-body',`<div class="wk-grid">${cells.map((d,i)=>{
-    const ds=d.toISOString().slice(0,10), isH=ds===hj;
-    const evs=evsDia(ds);
-    return `<div class="wk-day${isH?' today':''}"><div class="wkh">${dias[i]}</div><div class="wkn">${d.getDate()}</div>
-      ${evs.slice(0,4).map(e=>`<div class="cev ${e.c}">${e.l}</div>`).join('')}
-      ${evs.length>4?`<div style="font-size:10px;color:var(--light)">+${evs.length-4}</div>`:''}
+
+// Renderiza um item da lista de hoje
+function renderCalItem(ev) {
+  const cat = CAT[ev.cat] || CAT.evento;
+  const horaStr = ev.hora ? (ev.hora_fim ? `${ev.hora} → ${ev.hora_fim}` : ev.hora) : '';
+  const onclick = ev.tipo === 'evento' ? `abrirModal('evento','${ev.id}')` :
+                  ev.tipo === 'tarefa' ? `abrirModal('tarefa','${ev.id}')` :
+                  ev.tipo === 'entrega' ? `abrirModal('entrega','${ev.id}')` : '';
+  return `<div class="cal-item" style="border-left-color:${cat.cor}" ${onclick?`onclick="${onclick}"`:''}">
+    <div class="cal-item-hora">${horaStr || cat.ic}</div>
+    <div class="cal-item-body">
+      <div class="cal-item-title">${ev.titulo}</div>
+      ${ev.sub ? `<div class="cal-item-sub">${ev.sub}</div>` : ''}
+    </div>
+    <div class="cal-item-badge">
+      <span class="badge" style="background:${cat.bg};color:${cat.cor};font-size:10px">${cat.label}</span>
+    </div>
+  </div>`;
+}
+
+// ── VISTA SEMANA ───────────────────────────────────────────────
+function renderCalSemana() {
+  const n = new Date(), seg = new Date(n);
+  seg.setDate(n.getDate() - n.getDay() + 1 + (_calOff * 7));
+  const dias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const cells = Array.from({length:7}, (_,i) => { const d=new Date(seg); d.setDate(seg.getDate()+i); return d; });
+  if($('cal-lbl')) $('cal-lbl').textContent =
+    `${cells[0].toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})} — ${cells[6].toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}`;
+  const hj = hoje();
+  const MAX_PILLS = 3;
+
+  const colsHtml = cells.map((d,i) => {
+    const ds = d.toISOString().slice(0,10);
+    const isH = ds === hj;
+    const evs = evsDia(ds);
+    const visiveis = evs.slice(0, MAX_PILLS);
+    const resto   = evs.length - MAX_PILLS;
+
+    const pillsHtml = visiveis.map(ev => {
+      const cat = CAT[ev.cat] || CAT.evento;
+      const label = (ev.hora ? ev.hora+' ' : '') + ev.titulo;
+      const onclick = ev.tipo==='evento' ? `abrirModal('evento','${ev.id}')` :
+                      ev.tipo==='tarefa' ? `abrirModal('tarefa','${ev.id}')` :
+                      ev.tipo==='entrega'? `abrirModal('entrega','${ev.id}')` : '';
+      return `<div class="wk-pill ${cat.cls}" title="${ev.titulo}"
+        style="background:${cat.bg};color:${cat.cor}"
+        ${onclick?`onclick="${onclick}"`:''}>${label}</div>`;
+    }).join('');
+
+    return `<div class="wk-day${isH?' today':''}">
+      <div class="wkh">${dias[i]}</div>
+      <div class="wkn">${d.getDate()}</div>
+      <div class="wk-evs">
+        ${pillsHtml}
+        ${resto > 0 ? `<div class="wk-mais" onclick="calVerDia('${ds}')">+${resto} mais</div>` : ''}
+      </div>
+      <button class="wk-add" onclick="novoEventoHorario('${ds}','')">+ evento</button>
     </div>`;
-  }).join('')}</div>`);
+  }).join('');
+
+  R('cal-body', `<div class="wk-wrap"><div class="wk-grid">${colsHtml}</div></div>`);
 }
-function renderCalMes(){
-  const n=new Date(), ini=new Date(n.getFullYear(),n.getMonth()+_calOff,1);
-  if($('cal-lbl')) $('cal-lbl').textContent=ini.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  const dim=new Date(ini.getFullYear(),ini.getMonth()+1,0).getDate();
-  const fd=ini.getDay(), hj=hoje();
-  const dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  let cells=dias.map(d=>`<div style="text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:3px">${d}</div>`).join('');
-  for(let i=0;i<fd;i++) cells+='<div></div>';
+
+// ── VISTA MÊS ──────────────────────────────────────────────────
+function renderCalMes() {
+  const n = new Date(), ini = new Date(n.getFullYear(), n.getMonth()+_calOff, 1);
+  if($('cal-lbl')) $('cal-lbl').textContent = ini.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const dim = new Date(ini.getFullYear(), ini.getMonth()+1, 0).getDate();
+  const fd  = ini.getDay(); // domingo = 0
+  const hj  = hoje();
+  const diasNm = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const MAX_PILLS_MO = 2;
+
+  // Cabeçalho dos dias da semana
+  const cabecalho = `<div class="mo-cabecalho">${diasNm.map(d=>`<div>${d}</div>`).join('')}</div>`;
+
+  let cells = '';
+  // Células vazias do início
+  for(let i=0;i<fd;i++) cells += '<div class="mo-cell" style="background:transparent;border-color:transparent"></div>';
+
   for(let d=1;d<=dim;d++){
-    const ds=`${ini.getFullYear()}-${String(ini.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=evsDia(ds);
-    cells+=`<div class="mo-cell${ds===hj?' today':''}"><div class="mo-n">${d}</div>
-      ${evs.slice(0,2).map(e=>`<div class="cev ${e.c}" style="font-size:10px;padding:1px 4px">${e.l}</div>`).join('')}
-      ${evs.length>2?`<div style="font-size:10px;color:var(--light)">+${evs.length-2}</div>`:''}
+    const ds = `${ini.getFullYear()}-${String(ini.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs = evsDia(ds);
+    const isH = ds === hj;
+    const visiveis = evs.slice(0, MAX_PILLS_MO);
+    const resto    = evs.length - MAX_PILLS_MO;
+
+    // Pontos de cor para dias com muitos itens
+    const pontosHtml = evs.length > MAX_PILLS_MO
+      ? `<div class="mo-dots">${[...new Set(evs.map(e=>e.cat))].slice(0,4).map(cat => `<div class="mo-dot" style="background:${(CAT[cat]||CAT.evento).cor}"></div>`).join('')}</div>`
+      : '';
+
+    cells += `<div class="mo-cell${isH?' today':''}" onclick="calVerDia('${ds}')">
+      <div class="mo-n">${d}</div>
+      <div class="mo-evs">
+        ${visiveis.map(ev=>{
+          const cat = CAT[ev.cat]||CAT.evento;
+          return `<div class="mo-pill" style="background:${cat.bg};color:${cat.cor}" title="${ev.titulo}">${ev.titulo}</div>`;
+        }).join('')}
+        ${resto > 0 ? `<div class="mo-mais">+${resto}</div>` : ''}
+        ${pontosHtml}
+      </div>
     </div>`;
   }
-  R('cal-body',`<div class="mo-grid">${cells}</div>`);
+
+  R('cal-body', `${cabecalho}<div class="mo-grid">${cells}</div>`);
+}
+
+// Navegar para a vista Hoje de um dia específico
+function calVerDia(ds) {
+  _calOff = 0;
+  // Mudar para vista hoje e setar a data
+  const tabHoje = document.querySelector('.cal-tab');
+  calVista('hoje', tabHoje);
+  // Mostrar dia específico se não for hoje
+  if(ds !== hoje()) {
+    if($('cal-lbl')) $('cal-lbl').textContent = fmtData(ds);
+    // Renderizar os eventos do dia específico
+    const evs = (() => {
+      const _orig = hoje;
+      return evsDia(ds);
+    })();
+    // Reusar renderCalHoje mas para a data clicada
+    renderCalDiaEspecifico(ds);
+  }
+}
+
+function renderCalDiaEspecifico(ds) {
+  const evs = evsDia(ds);
+  const d = new Date(ds + 'T12:00:00');
+  const dataStr = d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+
+  if(!evs.length) {
+    R('cal-body', `<div class="card cal-vazia">
+      <div style="font-size:28px;margin-bottom:8px">📅</div>
+      <div>Nenhum item neste dia.</div>
+      <button class="cal-vazia-btn" onclick="novoEventoHorario('${ds}','')">+ Novo evento</button>
+    </div>`);
+    return;
+  }
+  const comHora = evs.filter(e => e.hora);
+  const semHora = evs.filter(e => !e.hora);
+  let html = `<div class="card" style="padding:14px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;color:var(--navy)">${d.getDate()}</div>
+        <div style="font-size:13px;color:var(--muted)">${dataStr}</div>
+      </div>
+      <button class="btn bsm" onclick="novoEventoHorario('${ds}','')">+ Evento</button>
+    </div>
+    <div class="cal-hoje-wrap">`;
+  if(comHora.length) { html += `<div class="cal-hoje-hora">Com horário</div>`; comHora.forEach(ev => { html += renderCalItem(ev); }); }
+  if(semHora.length) { html += `<div class="cal-hoje-hora" style="margin-top:${comHora.length?8:0}px">Sem horário fixo</div>`; semHora.forEach(ev => { html += renderCalItem(ev); }); }
+  html += `</div></div>`;
+  R('cal-body', html);
+}
+
+function novoEventoHorario(data, hora) {
+  _presetEvData = data; _presetEvHora = hora;
+  abrirModal('evento');
+}
+let _presetEvData = null, _presetEvHora = null;
+
+
+
+// ──────────────────────────────────────────────────────────────
+// DESAFIOS — módulo de desafios pessoais
+// Schema: id, nome, data_inicio, data_fim, total_dias,
+//         regras, metas, habitos_obrigatorios, cor, dias[]
+// dias[]: [{numero, data, status: ok|falha|pendente|futuro, nota}]
+// ──────────────────────────────────────────────────────────────
+
+function renderDesafios() {
+  const grid = $('grid-desafios');
+  if(!grid) return;
+  if(!DB.desafios.length) {
+    grid.innerHTML = `<div class="card empty">
+      <div class="ei">🏆</div>
+      <p>Nenhum desafio criado ainda.</p>
+      <button class="btn bp2" style="margin-top:12px" onclick="abrirModal('desafio')">+ Criar primeiro desafio</button>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = DB.desafios.map(dsf => renderCardDesafio(dsf)).join('');
+}
+
+function renderCardDesafio(dsf) {
+  const hj    = hoje();
+  const dias  = dsf.dias || [];
+  const total = dias.length;
+  const feitos = dias.filter(d => d.status === 'ok').length;
+  const falhas = dias.filter(d => d.status === 'falha').length;
+  const diaAtual = dias.find(d => d.data === hj);
+  const diaNum   = diaAtual ? diaAtual.numero : dias.filter(d => d.data <= hj).length;
+  const restam   = dias.filter(d => d.data > hj).length;
+  const pct      = total > 0 ? Math.round(feitos / total * 100) : 0;
+  const cor      = dsf.cor || 'var(--accent)';
+
+  // Alerta de falhas consecutivas
+  let maxFalhasConsec = 0, seq = 0;
+  dias.forEach(d => {
+    if(d.status === 'falha') { seq++; maxFalhasConsec = Math.max(maxFalhasConsec, seq); }
+    else seq = 0;
+  });
+  const alerta = maxFalhasConsec >= 2;
+
+  // Grid de dias — máximo 100
+  const diasGrid = dias.slice(0, 100).map(d => {
+    const isHj = d.data === hj;
+    const cls  = isHj ? 'hoje' : (d.status === 'futuro' && d.data > hj ? 'futuro' : d.status);
+    return `<div class="dsf-dia ${cls}" title="Dia ${d.numero} · ${fmtData(d.data)}"
+      onclick="toggleDiaDesafio('${dsf.id}','${d.data}')">${d.numero}</div>`;
+  }).join('');
+
+  return `<div class="dsf-card" style="border-top-color:${cor}">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+      <div>
+        <div class="dsf-title">${dsf.nome || '—'}</div>
+        <div class="dsf-sub">${fmtData(dsf.data_inicio)} → ${fmtData(dsf.data_fim)} · ${total} dias</div>
+      </div>
+      <div style="display:flex;gap:3px">
+        <button class="btn bsm" onclick="abrirModal('desafio','${dsf.id}')">✎</button>
+        <button class="btn bsm bd" onclick="excluir('desafio','${dsf.id}')">✕</button>
+      </div>
+    </div>
+
+    ${alerta ? `<div class="dsf-alerta">⚠ Atenção: ${maxFalhasConsec} falhas consecutivas!</div>` : ''}
+
+    <div class="dsf-stats">
+      <div class="dsf-stat">
+        <div class="dsf-stat-val" style="color:var(--accent)">${diaNum || '—'}</div>
+        <div class="dsf-stat-lbl">Dia atual</div>
+      </div>
+      <div class="dsf-stat">
+        <div class="dsf-stat-val" style="color:var(--ok)">${pct}%</div>
+        <div class="dsf-stat-lbl">Concluído</div>
+      </div>
+      <div class="dsf-stat">
+        <div class="dsf-stat-val" style="color:${restam < 10 ? 'var(--err)' : 'var(--navy)'}">${restam}</div>
+        <div class="dsf-stat-lbl">Dias restantes</div>
+      </div>
+    </div>
+
+    <div class="pbar" style="margin-bottom:10px">
+      <div class="pfill" style="width:${pct}%;background:${cor}"></div>
+    </div>
+
+    <div class="dsf-grid">${diasGrid}</div>
+
+    <div class="dsf-legenda">
+      <span><span class="dot" style="background:var(--ok)"></span>Ok (${feitos})</span>
+      <span><span class="dot" style="background:var(--err-bg);border:1px solid var(--err)"></span>Falha (${falhas})</span>
+      <span><span class="dot" style="background:var(--accent)"></span>Hoje</span>
+    </div>
+
+    ${dsf.metas  ? `<div style="font-size:12px;color:var(--muted);margin-top:9px;padding-top:8px;border-top:1px solid var(--border)">🎯 ${dsf.metas}</div>` : ''}
+    ${dsf.regras ? `<div style="font-size:12px;color:var(--muted);margin-top:3px">📋 ${dsf.regras}</div>` : ''}
+  </div>`;
+}
+
+function toggleDiaDesafio(dsfId, data) {
+  const dsf = DB.desafios.find(d => d.id === dsfId); if(!dsf) return;
+  const dia = (dsf.dias || []).find(d => d.data === data); if(!dia) return;
+  if(data > hoje()) { showToast('Este dia ainda não chegou.'); return; }
+  const ciclo = ['pendente','ok','falha'];
+  dia.status = ciclo[(ciclo.indexOf(dia.status) + 1) % ciclo.length];
+  salvarLocal();
+  renderDesafios();
+}
+
+function gerarDias(dataInicio, dataFim, diasExistentes) {
+  const dias = [], existMap = {};
+  (diasExistentes || []).forEach(d => existMap[d.data] = d);
+  let cur = new Date(dataInicio + 'T12:00:00');
+  const fim = new Date(dataFim + 'T12:00:00');
+  let num = 1;
+  while(cur <= fim) {
+    const ds = cur.toISOString().slice(0,10);
+    const ex = existMap[ds];
+    dias.push(ex
+      ? { ...ex, numero: num }
+      : { numero: num, data: ds, status: ds <= hoje() ? 'pendente' : 'futuro', nota: '' }
+    );
+    num++; cur.setDate(cur.getDate() + 1);
+  }
+  return dias;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1613,6 +2537,14 @@ function renderConfig(){
     {k:'ORIGENS',lb:'Origens (Financeiro)'},
     {k:'STATUS_IDEIAS',lb:'Status de Ideias'}
   ];
+  // Preencher perfil metabólico
+  if($('cfg-altura')) $('cfg-altura').value = DB.config.altura_cm || '';
+  if($('cfg-peso-ref')) $('cfg-peso-ref').value = DB.config.peso_ref || '';
+  if($('cfg-idade')) $('cfg-idade').value = DB.config.idade || '';
+  if($('cfg-sexo')) $('cfg-sexo').value = DB.config.sexo || 'feminino';
+  if($('cfg-atividade')) $('cfg-atividade').value = DB.config.nivel_atividade || 'moderado';
+  atualizarTMBPreview();
+
   R('cfg-listas', listas.map(({k,lb})=>`
     <div class="card">
       <div class="ct">${lb}</div>
@@ -1624,6 +2556,29 @@ function renderTags(k){ return (DB.config[k]||[]).map((v,i)=>`<span class="tag">
 function addTag(k){ const el=$('ti-'+k); const v=el.value.trim(); if(!v)return; (DB.config[k]=DB.config[k]||[]).push(v); el.value=''; salvarLocal(); R('tags-'+k,renderTags(k)); showToast('Adicionado!'); }
 function rmTag(k,i){ DB.config[k].splice(i,1); salvarLocal(); R('tags-'+k,renderTags(k)); }
 function salvarCfg(){ DB.config.nome_usuario=$('cfg-nome').value; DB.config.meta_vendas=Number($('cfg-meta').value); salvarLocal(); showToast('Configurações salvas!'); }
+function salvarCfgPerfil() {
+  DB.config.altura_cm        = Number($('cfg-altura')?.value || 0);
+  DB.config.peso_ref         = Number($('cfg-peso-ref')?.value || 0);
+  DB.config.idade            = Number($('cfg-idade')?.value || 0);
+  DB.config.sexo             = $('cfg-sexo')?.value || 'feminino';
+  DB.config.nivel_atividade  = $('cfg-atividade')?.value || 'moderado';
+  salvarLocal();
+  showToast('Perfil metabólico salvo!');
+  atualizarTMBPreview();
+}
+
+function atualizarTMBPreview() {
+  const el = $('cfg-tmb-preview'); if(!el) return;
+  const tmb  = calcTMB();
+  const meta = calcMeta();
+  if(!tmb) {
+    el.textContent = 'Preencha altura, peso e idade para calcular.';
+    return;
+  }
+  el.innerHTML = `TMB: <b>${tmb} kcal</b> · Meta diária com atividade: <b>${meta} kcal</b>`;
+}
+
+
 
 // ──────────────────────────────────────────────────────────────
 // GOOGLE SHEETS
@@ -1668,7 +2623,9 @@ const SCHEMAS = {
   financeiro:     {req:['descricao'],     cols:['id','tipo_financeiro','tipo','descricao','valor_bruto','comissao','custo','valor_liquido','data','categoria','status','forma_pagamento','origem','cliente_id','observacao','criado_em']},
   planoFin:       {req:['objetivo'],      cols:['id','tipo_financeiro','objetivo','acao','valor_estimado','prazo','prioridade','status','observacoes','criado_em']},
   habitos:        {req:['data'],          cols:['id','data','agua','exercicio','alimentacao','meditacao','alcool_nao','peso','calorias','obs','criado_em']},
-  ideias:         {req:['conteudo'],      cols:['id','tipo','conteudo','area','prioridade','status','criado_em']}
+  ideias:         {req:['conteudo'],      cols:['id','tipo','conteudo','area','prioridade','status','criado_em']},
+  eventos:        {req:['titulo','data'],  cols:['id','titulo','tipo','data','hora_inicio','hora_fim','descricao','prioridade','status','categoria','criado_em']},
+  desafios:       {req:['nome','data_inicio','data_fim'], cols:['id','nome','data_inicio','data_fim','total_dias','regras','metas','habitos_obrigatorios','cor','criado_em']}
 };
 // Normaliza cabeçalho: remove acentos, espaços, maiúsculas
 function normK(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\s\-\/]+/g,'_').replace(/[^a-z0-9_]/g,''); }
@@ -1820,7 +2777,7 @@ const PLURAL = {
   tarefa:'tarefas',cliente:'clientes',subtarefa:'subtarefas',entrega:'entregas',
   projeto:'projetos',subproj:'subtarefasProj',
   financeiro:'financeiro',plano:'planoFin',
-  habito:'habitos',ideia:'ideias'
+  habito:'habitos',ideia:'ideias',evento:'eventos',desafio:'desafios'
 };
 
 function construirForm(tipo,id){
@@ -1962,6 +2919,58 @@ function construirForm(tipo,id){
     <div class="fgrp full"><label>Observação do dia</label><textarea name="obs">${v('obs')}</textarea></div>
   </div>`;
 
+
+  if(tipo === 'evento') {
+    const pData = _presetEvData || hoje();
+    const pHora = _presetEvHora || '';
+    const tipoOpts = TIPOS_EVENTO.map(t =>
+      `<option value="${t}"${v('tipo',t)===t||(!rec.tipo&&t==='reuniao')?' selected':''}>${TIPO_EV_LABEL[t]||t}</option>`
+    ).join('');
+    return `<div class="fg">
+      <div class="fgrp full"><label>Título *</label><input name="titulo" value="${v('titulo')}" required placeholder="ex: Reunião com cliente, Descanso…"></div>
+      <div class="fgrp"><label>Tipo</label><select name="tipo">${tipoOpts}</select></div>
+      <div class="fgrp"><label>Data</label><input type="date" name="data" value="${v('data',pData)}"></div>
+      <div class="fgrp"><label>Hora início</label><input type="time" name="hora_inicio" value="${v('hora_inicio',pHora)}"></div>
+      <div class="fgrp"><label>Hora fim</label><input type="time" name="hora_fim" value="${v('hora_fim')}"></div>
+      <div class="fgrp"><label>Prioridade</label>${selCfg('prioridade','PRIORIDADES','media')}</div>
+      <div class="fgrp"><label>Status</label>
+        <select name="status">
+          <option value="previsto"${v('status','previsto')==='previsto'?' selected':''}>Previsto</option>
+          <option value="concluido"${v('status')==='concluido'?' selected':''}>Concluído</option>
+          <option value="cancelado"${v('status')==='cancelado'?' selected':''}>Cancelado</option>
+        </select>
+      </div>
+      <div class="fgrp"><label>Categoria</label><input name="categoria" value="${v('categoria')}" placeholder="ex: YM, Pessoal, Saúde…"></div>
+      <div class="fgrp full"><label>Descrição</label><textarea name="descricao" rows="2">${v('descricao')}</textarea></div>
+    </div>`;
+  }
+
+
+  if(tipo === 'desafio') {
+    const cores = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0284c7','#0f172a'];
+    const corAtual = v('cor','#2563eb');
+    return `<div class="fg">
+      <div class="fgrp full"><label>Nome do desafio *</label>
+        <input name="nome" value="${v('nome')}" required placeholder="ex: Desafio 100 dias sem açúcar"></div>
+      <div class="fgrp"><label>Data início *</label>
+        <input type="date" name="data_inicio" value="${v('data_inicio',hoje())}" required></div>
+      <div class="fgrp"><label>Data fim *</label>
+        <input type="date" name="data_fim" value="${v('data_fim')}" required></div>
+      <div class="fgrp full"><label>Metas</label>
+        <input name="metas" value="${v('metas')}" placeholder="ex: Perder 5kg, criar rotina consistente"></div>
+      <div class="fgrp full"><label>Regras</label>
+        <textarea name="regras" rows="2">${v('regras')}</textarea></div>
+      <div class="fgrp full"><label>Hábitos obrigatórios</label>
+        <input name="habitos_obrigatorios" value="${v('habitos_obrigatorios')}" placeholder="ex: Exercício, sem álcool, meditação"></div>
+      <div class="fgrp full"><label>Cor do desafio</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          ${cores.map(cor => `<div style="width:32px;height:32px;border-radius:50%;background:${cor};cursor:pointer;border:3px solid ${corAtual===cor?'#000':'transparent'};transition:all .15s" onclick="this.parentNode.querySelectorAll('div').forEach(d=>d.style.border='3px solid transparent');this.style.border='3px solid #000';this.closest('.fg').querySelector('[name=cor]').value='${cor}'"></div>`).join('')}
+          <input type="hidden" name="cor" value="${corAtual}">
+        </div>
+      </div>
+    </div>`;
+  }
+
   // ideia / captura
   return `<div class="fg">
     <div class="fgrp"><label>Tipo</label>
@@ -1992,6 +3001,14 @@ function salvarModal(){
   const data={};
   inp.forEach(el=>{ if(el.name) data[el.name]=el.value; });
 
+  // Gerar dias para desafio ao criar/editar
+  if(_modalTipo === 'desafio') {
+    if(data.data_inicio && data.data_fim) {
+      const existente = _editId ? (DB.desafios.find(d=>d.id===_editId)||{}).dias : null;
+      data.dias = gerarDias(data.data_inicio, data.data_fim, existente);
+      data.total_dias = data.dias.length;
+    }
+  }
   // Auto-calc valor_liquido (sempre sobrescreve)
   if(_modalTipo==='financeiro'){
     const liq=Number(data.valor_bruto||0)-Number(data.comissao||0)-Number(data.custo||0);
@@ -2012,6 +3029,7 @@ function salvarModal(){
   }
 
   salvarLocal(); fecharModal();
+  _presetCliId = null; _presetEvData = null; _presetEvHora = null;
   showToast(_editId?'Atualizado!':'Salvo com sucesso!');
   if(_modalTipo==='subproj') renderProjetos();
   else { const a=document.querySelector('.section.active'); if(a) renderSec(a.id.replace('sec-','')); }
@@ -2076,6 +3094,19 @@ function carregarExemplo(){
     {id:uid(),tipo:'ideia',conteudo:'Criar série de conteúdo sobre bastidores da consultoria',area:'YM',prioridade:'media',status:'novo',criado_em:hoje()},
     {id:uid(),tipo:'pendencia',conteudo:'Renovar domínio do site YM',area:'YM',prioridade:'alta',status:'novo',criado_em:hoje()}
   ];
+  // Desafio de exemplo
+  const dsfId = uid();
+  const dsfInicio = hoje();
+  const dsfFimD = new Date(); dsfFimD.setDate(dsfFimD.getDate()+99);
+  const dsfFim = dsfFimD.toISOString().slice(0,10);
+  DB.desafios=[{
+    id:dsfId, nome:'Desafio 100 dias', data_inicio:dsfInicio, data_fim:dsfFim,
+    metas:'Criar rotina consistente e alcançar meus objetivos', cor:'#2563eb',
+    regras:'Exercício diário · Sem redes sociais depois das 21h · 2L de água',
+    habitos_obrigatorios:'exercicio,alimentacao',
+    dias: gerarDias(dsfInicio, dsfFim, []),
+    total_dias:100, criado_em:hoje()
+  }];
   salvarLocal();
 }
 
@@ -2108,6 +3139,10 @@ async function init(){
 
   // Auto-sync a cada 30 min
   setInterval(()=>{ snap(); }, 30*60*1000);
+
+  // Inicializar histórico SPA
+  history.replaceState({ sec: 'dashboard' }, '', '#dashboard');
+  updateFAB('dashboard');
 
   // Keyboard shortcuts
   document.addEventListener('keydown',e=>{
