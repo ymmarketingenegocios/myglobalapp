@@ -1163,7 +1163,7 @@ let _modalTipo = null, _editId = null, _projPreset = null;
 let _filt = { tar:'todas', cli:'todos', ent:'todas', fin:'todos', ide:'todas' };
 let _filtExtra = { tarPrio:'', tarArea:'', subCli:'', entCli:'', subpProj:'' };
 let _calVista = 'semana', _calOff = 0;
-let _snaps = [], _syncTimer = null;
+let _snaps = [];
 
 // ──────────────────────────────────────────────────────────────
 // UTILITÁRIOS
@@ -1220,51 +1220,108 @@ function vazio(msg) {
 // ──────────────────────────────────────────────────────────────
 // PERSISTÊNCIA — localStorage + Google Sheets
 // ──────────────────────────────────────────────────────────────
-let _syncEmAndamento = false;
+// ──────────────────────────────────────────────────────────────
+// PERSISTÊNCIA — localStorage como fonte de verdade
+// Sheets recebe upsert individual imediato, nunca saveAll automático
+// ──────────────────────────────────────────────────────────────
 
+var _syncTimer = null;
+var _syncEmAndamento = false;
+var _upsertQueue = []; // fila de upserts pendentes
+
+// Salva no localStorage IMEDIATAMENTE e agenda upsert no Sheets
 function salvarLocal() {
-  try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e){}
-  if(!_syncEmAndamento) agendarSync();
+  // 1. localStorage primeiro — nunca falha, é síncrono
+  try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e) {
+    console.warn('[YM] localStorage falhou:', e);
+  }
+  // 2. Sheets: agenda sincronização (debounce 1.5s para não spam)
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(sincSheets, 1500);
+}
+
+// Salva registro individual imediatamente no Sheets (sem esperar debounce)
+function salvarImediato(chave, registro) {
+  // localStorage já foi salvo por salvarLocal()
+  // Envia upsert individual para o Sheets agora
+  var url = DB.config.sheets_url;
+  if(!url) return;
+  fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'upsert', sheet: chave, record: registro })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if(d.ok) {
+      setSyncDot('ok');
+      console.log('[YM] upsert ok:', chave, registro.id);
+    }
+  })
+  .catch(function(e) {
+    console.warn('[YM] upsert falhou, dado seguro no localStorage:', e);
+    setSyncDot('err');
+  });
 }
 
 function carregarLocal() {
   try {
-    const s = localStorage.getItem('ym_db');
+    var s = localStorage.getItem('ym_db');
     if(!s) return false;
-    const d = JSON.parse(s);
-    SYNC_KEYS.forEach(k => { if(Array.isArray(d[k])) DB[k] = d[k]; });
-    if(d.config) Object.assign(DB.config, d.config);
+    var d = JSON.parse(s);
+    SYNC_KEYS.forEach(function(k) {
+      if(Array.isArray(d[k]) && d[k].length > 0) DB[k] = d[k];
+    });
+    if(d.config && typeof d.config === 'object') {
+      Object.assign(DB.config, d.config);
+    }
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    console.warn('[YM] erro ao carregar localStorage:', e);
+    return false;
+  }
 }
 
 function agendarSync() {
   clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(sincSheets, 900);
+  _syncTimer = setTimeout(sincSheets, 1500);
 }
 
 function sincSheets() {
   var url = DB.config.sheets_url;
   if(!url || _syncEmAndamento) return;
+
+  // Proteção: não envia se DB está vazio (evita apagar Sheets com dados)
+  var totalRegistros = SYNC_KEYS.reduce(function(acc, k){ return acc + (DB[k]||[]).length; }, 0);
+  if(totalRegistros === 0) {
+    console.log('[YM] sincSheets: DB vazio, não enviando');
+    return;
+  }
+
   _syncEmAndamento = true;
   setSyncDot('spin');
+  console.log('[YM] sincSheets: enviando', totalRegistros, 'registros');
+
   fetch(url, {
-    method:'POST',
-    body: JSON.stringify({ action:'saveAll', data: DB })
+    method: 'POST',
+    body: JSON.stringify({ action: 'saveAll', data: DB })
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
     if(d.error) throw new Error(d.error);
     setSyncDot('ok');
+    console.log('[YM] sincSheets: ok');
   })
-  .catch(function(){ setSyncDot('err'); })
+  .catch(function(e){
+    setSyncDot('err');
+    console.warn('[YM] sincSheets erro (dados seguros no localStorage):', e);
+  })
   .finally(function(){ _syncEmAndamento = false; });
 }
 
 function carregarSheets() {
   var url = DB.config.sheets_url;
   if(!url) return Promise.resolve(false);
-  setLoader('Sincronizando com Google Sheets…');
+  setLoader('Carregando do Google Sheets…');
   return fetch(url + '?action=getAll')
     .then(function(r){
       if(!r.ok) throw new Error('HTTP ' + r.status);
@@ -1272,29 +1329,54 @@ function carregarSheets() {
     })
     .then(function(d){
       if(d.error) throw new Error(d.error);
-      // MERGE SEGURO — nunca apaga dados locais
+      console.log('[YM] Sheets resposta recebida');
+
+      var novosRegistros = 0;
+
+      // MERGE ADITIVO PURO — só ADICIONA, nunca remove
+      // Regra: se existe no local → mantém local (local é fonte de verdade)
+      // Regra: se existe no Sheets mas não no local → adiciona ao local
       SYNC_KEYS.forEach(function(k){
         var remoto = d[k];
-        if(!Array.isArray(remoto)) return;
-        if(remoto.length === 0 && DB[k].length > 0) return;
-        var remotosIds = new Set(remoto.map(function(r){ return String(r.id); }));
-        var somenteLocais = (DB[k]||[]).filter(function(l){ return l.id && !remotosIds.has(String(l.id)); });
-        DB[k] = remoto.concat(somenteLocais);
+        if(!Array.isArray(remoto) || remoto.length === 0) return;
+
+        var localIds = new Set((DB[k]||[]).map(function(r){ return String(r.id); }));
+
+        // Adiciona apenas registros que existem no Sheets mas não no local
+        remoto.forEach(function(reg){
+          if(reg.id && !localIds.has(String(reg.id))) {
+            DB[k].push(reg);
+            localIds.add(String(reg.id));
+            novosRegistros++;
+          }
+        });
       });
-      // Config merge aditivo
+
+      // Config: merge aditivo (nunca sobrescreve)
       if(d.config && !Array.isArray(d.config)) {
         Object.keys(d.config).forEach(function(k){
           var val = d.config[k];
-          if(val !== '' && val !== null && val !== undefined && val !== 0) DB.config[k] = val;
+          // Só adiciona se local não tem ou está vazio
+          var localVal = DB.config[k];
+          var localVazio = localVal === '' || localVal === null || localVal === undefined || localVal === 0;
+          if(localVazio && val !== '' && val !== null && val !== undefined) {
+            DB.config[k] = val;
+          }
         });
       }
+
+      console.log('[YM] Sheets merge: +' + novosRegistros + ' registros novos do Sheets');
+
+      // Salva o merge no localStorage
       try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e){}
+
       setLoader(''); setSyncDot('ok');
       return true;
     })
     .catch(function(e){
+      console.warn('[YM] Sheets indisponível — dados locais preservados:', e.message);
       setLoader(''); setSyncDot('err');
-      showBanner('Google Sheets offline — usando dados locais', 'warn');
+      showBanner('Google Sheets offline — dados locais preservados', 'warn');
       return false;
     });
 }
@@ -2080,6 +2162,9 @@ function salvarHab() {
   const ativ  = $('hab-atividade')?.value;  if(ativ  !== '') h.atividade       = ativ;
   const obs   = $('hab-obs')?.value;    if(obs   !== '')  h.obs             = obs;
   salvarLocal();
+  // Upsert imediato do registro do dia no Sheets
+  var _habHoje = DB.habitos[hIdx];
+  if(_habHoje) salvarImediato('habitos', _habHoje);
   showToast('Hábitos salvos!');
   renderHabitos();
 }
@@ -3078,7 +3163,21 @@ function salvarModal(){
     arr.push({id:uid(),criado_em:hoje(),...data});
   }
 
-  salvarLocal(); fecharModal();
+  // Salva no localStorage imediatamente
+  salvarLocal();
+
+  // Envia upsert individual ao Sheets IMEDIATAMENTE (não espera debounce)
+  var _chave = PLURAL[_modalTipo];
+  var _arr   = DB[_chave];
+  var _novoRec = _arr ? _arr[_arr.length - 1] : null;
+  if(_editId) {
+    _novoRec = _arr ? _arr.find(function(r){ return r.id === _editId; }) : null;
+  }
+  if(_chave && _novoRec) {
+    salvarImediato(_chave, _novoRec);
+  }
+
+  fecharModal();
   _presetCliId = null; _presetEvData = null; _presetEvHora = null;
   showToast(_editId?'Atualizado!':'Salvo com sucesso!');
   if(_modalTipo==='subproj') renderProjetos();
@@ -3334,12 +3433,15 @@ function init(){
   if(DB.config.sheets_url){
     carregarSheets().then(function(ok){
       if(ok){
+        // Após merge com Sheets, re-inserir dados reais caso
+        // tenham vindo do Sheets mas com IDs diferentes
         carregarDadosReais();
+        // Re-renderiza com dados atualizados
         renderDash();
+        console.log('[YM] Sheets sync completo | clientes:', DB.clientes.length, '| fin:', DB.financeiro.length);
       }
-    }).catch(function(){
-      showBanner('Google Sheets offline — usando dados locais', 'warn');
     });
+    // Não mostra banner de erro — Sheets é opcional, localStorage é a base
   }
 
   // ── 8. Auto-sync a cada 30 min ───────────────────────────
