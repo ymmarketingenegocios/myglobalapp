@@ -1169,23 +1169,79 @@ let _snaps = [];
 // UTILITÁRIOS
 // ──────────────────────────────────────────────────────────────
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-const hoje = () => new Date().toISOString().slice(0,10);
+// Retorna YYYY-MM-DD usando hora LOCAL do device (não UTC)
+// Evita bug de timezone em Android: UTC-3 pode retornar ontem entre 00:00-02:59
+const hoje = () => {
+  var _d = new Date();
+  return _d.getFullYear() + '-' +
+         String(_d.getMonth()+1).padStart(2,'0') + '-' +
+         String(_d.getDate()).padStart(2,'0');
+};
+
+// ── FUNÇÕES DE DATA — únicas, usadas em todo o sistema ───────
+
+// Converte QUALQUER formato de data para YYYY-MM-DD ou '' se inválido
+// Suporta: YYYY-MM-DD, DD/MM/YYYY, DD/MM/YY, ISO strings, Date objects
+function normalizarData(d) {
+  if(!d) return '';
+  if(d instanceof Date) {
+    if(isNaN(d)) return '';
+    return d.getFullYear() + '-' +
+           String(d.getMonth()+1).padStart(2,'0') + '-' +
+           String(d.getDate()).padStart(2,'0');
+  }
+  var s = String(d).trim();
+  if(!s) return '';
+  // Já está em YYYY-MM-DD (pode ter T após)
+  var iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso) return iso[1] + '-' + iso[2] + '-' + iso[3];
+  // DD/MM/YYYY ou DD/MM/YY
+  var br = s.match(/^(\d{2})\/(\d{2})\/(\d{2,4})$/);
+  if(br) {
+    var y = br[3].length === 2 ? '20' + br[3] : br[3];
+    return y + '-' + br[2] + '-' + br[1];
+  }
+  // Fallback: deixar o Date parser tentar
+  try {
+    var dt = new Date(s);
+    if(!isNaN(dt)) return normalizarData(dt);
+  } catch(e) {}
+  return '';
+}
+
+// Cria objeto Date seguro a partir de string YYYY-MM-DD
+// Usa meio-dia (12:00) para evitar problema de DST/timezone
+function parseDataSegura(d) {
+  var n = normalizarData(d);
+  if(!n) return null;
+  var dt = new Date(n + 'T12:00:00');
+  return isNaN(dt) ? null : dt;
+}
+
+// Formata data para exibição (DD/MM/AA)
+function fmtData(d) {
+  if(!d) return '—';
+  var dt = parseDataSegura(d);
+  if(!dt) return String(d); // retorna o valor bruto se não conseguir parsear
+  return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+}
+
 const $ = id => document.getElementById(id);
 const R = (id, html) => { const e = $(id); if(e) e.innerHTML = html; };
 
-function fmtData(d) {
-  if(!d) return '—';
-  try { return new Date(d + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
-  catch(e) { return d; }
-}
+// fmtData() definida acima em FUNÇÕES DE DATA
 const moeda = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
-const atrasado = d => d && d < hoje();
-const ehHoje = d => d === hoje();
+const atrasado = d => { var n = normalizarData(d); return n && n < hoje(); };
+const ehHoje = d => normalizarData(d) === hoje();
 const estaSemana = d => {
-  if(!d) return false;
-  const n=new Date(), seg=new Date(n); seg.setDate(n.getDate()-n.getDay()+1);
-  const dom=new Date(seg); dom.setDate(seg.getDate()+6);
-  const dt=new Date(d+'T12:00:00'); return dt>=seg && dt<=dom;
+  var n = normalizarData(d);
+  if(!n) return false;
+  var now = new Date(), seg = new Date(now);
+  seg.setDate(now.getDate() - now.getDay() + 1);
+  seg.setHours(0,0,0,0);
+  var dom = new Date(seg); dom.setDate(seg.getDate()+6); dom.setHours(23,59,59,999);
+  var dt = parseDataSegura(n);
+  return dt && dt >= seg && dt <= dom;
 };
 const boolTrue = v => v===true || v==='true' || v==='TRUE' || v==='1';
 
@@ -1343,8 +1399,15 @@ function carregarSheets() {
         var localIds = new Set((DB[k]||[]).map(function(r){ return String(r.id); }));
 
         // Adiciona apenas registros que existem no Sheets mas não no local
+        // Normaliza datas antes de inserir (Sheets pode converter para formato local)
+        var _camposData = ['data','vencimento','prazo','prazo_entrega','data_inicio',
+                           'data_fim','criado_em','concluido_em','hora_inicio','hora_fim'];
         remoto.forEach(function(reg){
           if(reg.id && !localIds.has(String(reg.id))) {
+            // Normalizar campos de data do registro remoto
+            _camposData.forEach(function(campo){
+              if(reg[campo]) reg[campo] = normalizarData(reg[campo]) || reg[campo];
+            });
             DB[k].push(reg);
             localIds.add(String(reg.id));
             novosRegistros++;
@@ -3163,6 +3226,11 @@ function salvarModal(){
     arr.push({id:uid(),criado_em:hoje(),...data});
   }
 
+  // Normalizar datas antes de salvar
+  ['data','vencimento','prazo','prazo_entrega','data_inicio','data_fim'].forEach(function(campo){
+    if(data[campo]) data[campo] = normalizarData(data[campo]) || data[campo];
+  });
+
   // Salva no localStorage imediatamente
   salvarLocal();
 
@@ -3201,7 +3269,7 @@ function excluir(tipo,id){
 // ──────────────────────────────────────────────────────────────
 function carregarDadosReais() {
   console.log('[YM] carregarDadosReais() — antes:', DB.clientes.length, 'clientes');
-  const hj = '2026-05-28';
+  var hj = hoje(); // data dinâmica — nunca hardcoded
 
   // ── CLIENTES REAIS ────────────────────────────────────────
   const clientesReais = [
