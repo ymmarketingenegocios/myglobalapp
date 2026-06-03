@@ -502,6 +502,42 @@ textarea{resize:vertical;min-height:62px}
   color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif;min-height:32px}
 .dp-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 
+
+/* ═══ DASHBOARD v2 — PAINEL DE EXECUÇÃO PESSOAL ════════════ */
+
+/* Termômetro do dia — 3 cards compactos */
+.termo-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px 10px;text-align:center;
+  box-shadow:var(--shadow);cursor:pointer;transition:box-shadow .15s;
+  border-top:3px solid var(--border)
+}
+.termo-card:hover{box-shadow:var(--shadow-md)}
+.termo-card.hab{border-top-color:#0f766e}
+.termo-card.rot{border-top-color:var(--accent)}
+.termo-card.tar{border-top-color:#7c3aed}
+.termo-num{
+  font-family:'Montserrat',sans-serif;font-weight:800;
+  font-size:22px;line-height:1;color:var(--navy);margin-bottom:3px
+}
+.termo-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.termo-sub{font-size:10px;color:var(--light)}
+.termo-pbar{height:3px;background:#f1f5f9;border-radius:2px;margin-top:6px}
+.termo-pfill{height:3px;border-radius:2px;transition:width .3s}
+
+/* Desafio no dashboard — card especial */
+#d-dsf-wrap{border-left:4px solid var(--accent)}
+
+/* Financeiro resumido — grid compacto */
+.fin-resumo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.fin-item{padding:8px 10px;background:#f8fafc;border-radius:var(--rs);border:1px solid var(--border)}
+.fin-item-val{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;line-height:1}
+.fin-item-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase}
+.fin-item.recebido .fin-item-val{color:var(--ok)}
+.fin-item.apagar .fin-item-val{color:var(--err)}
+.fin-item.areceber .fin-item-val{color:var(--info)}
+.fin-item.pct .fin-item-val{color:var(--accent)}
+
 /* ═══ ANIMATIONS ═════════════════════════════════════════════ */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
@@ -655,86 +691,55 @@ textarea{resize:vertical;min-height:62px}
      DASHBOARD
 ══════════════════════════════════════════════════════════ -->
 <section id="sec-dashboard" class="section active">
-  <div class="toolbar">
-    <h2 id="dash-saudacao">Bom dia!</h2>
-    <button class="btn bp2 bsm" onclick="abrirCaptura()">+ Captura rápida</button>
+
+  <!-- Saudação -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <h2 id="dash-saudacao" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;color:var(--navy)">Bom dia!</h2>
+    <span id="hdr-date-dash" style="font-size:11px;color:var(--muted)"></span>
   </div>
 
-  <!-- Filtro de período (afeta hábitos, tarefas, rotinas) -->
+  <!-- Filtro de período -->
   <div class="dash-periodo">
     <button class="dp-btn on" onclick="setDashPeriodo('hoje',this)">Hoje</button>
     <button class="dp-btn" onclick="setDashPeriodo('semana',this)">Semana</button>
     <button class="dp-btn" onclick="setDashPeriodo('mes',this)">Mês</button>
   </div>
 
-  <!-- Stats topo -->
-  <div class="g4" id="d-stats"></div>
+  <!-- ═══ BLOCO 1: TERMÔMETRO DO DIA ═══════════════════════ -->
+  <div id="d-termometro" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"></div>
 
-  <!-- Hábitos + Rotina -->
-  <div class="g2">
-    <div class="card clink" onclick="ir('habitos')">
-      <div class="ct">◎ Hábitos de hoje</div>
-      <div id="d-hab"></div>
-    </div>
-    <div class="card clink" onclick="ir('tarefas')">
-      <div class="ct">◫ Rotina do dia</div>
-      <div id="d-rot"></div>
-    </div>
+  <!-- ═══ BLOCO 2: DESAFIO ATIVO ══════════════════════════ -->
+  <div class="card clink" onclick="ir('desafios')" id="d-dsf-wrap">
+    <div class="ct">◈ Desafio ativo</div>
+    <div id="d-dsf"></div>
   </div>
 
-  <!-- Tarefas -->
+  <!-- ═══ BLOCO 3: DETALHAMENTO DO DIA ════════════════════ -->
+
+  <!-- 3a. Hábitos -->
+  <div class="card clink" onclick="ir('habitos')">
+    <div class="ct" id="d-hab-ct">◎ Hábitos de hoje</div>
+    <div id="d-hab"></div>
+  </div>
+
+  <!-- 3b. Rotinas -->
+  <div class="card clink" onclick="ir('rotinas')">
+    <div class="ct" id="d-rot-ct">⏱ Rotinas do dia</div>
+    <div id="d-rot-desemp"></div>
+  </div>
+
+  <!-- 3c. Tarefas -->
   <div class="card clink" onclick="ir('tarefas')">
-    <div class="ct">✓ Tarefas de hoje</div>
+    <div class="ct" id="d-tar-ct">✓ Tarefas de hoje</div>
     <div id="d-tar"></div>
   </div>
 
-  <!-- Entregas + Clientes -->
-  <div class="g2">
-    <div class="card clink" onclick="ir('entregas')">
-      <div class="ct">◪ Entregas em aberto</div>
-      <div id="d-ent"></div>
-    </div>
-    <div class="card clink" onclick="ir('clientes')">
-      <div class="ct">◉ Clientes ativos</div>
-      <div id="d-cli"></div>
-    </div>
+  <!-- ═══ BLOCO 4: FINANCEIRO RESUMIDO ════════════════════ -->
+  <div class="card clink" onclick="ir('financeiro')">
+    <div class="ct">◊ Financeiro do mês</div>
+    <div id="d-fin"></div>
   </div>
 
-  <!-- Projetos + Ideias -->
-  <div class="g2">
-    <div class="card clink" onclick="ir('projetos')">
-      <div class="ct">◧ Projetos em andamento</div>
-      <div id="d-pro"></div>
-    </div>
-    <div class="card clink" onclick="ir('ideias')">
-      <div class="ct">◌ Capturas recentes</div>
-      <div id="d-ide"></div>
-    </div>
-  </div>
-
-  <!-- Rotinas + Desafio ativo -->
-  <div class="g2">
-    <div class="card clink" onclick="ir('rotinas')">
-      <div class="ct">⏱ Rotinas do dia</div>
-      <div id="d-rot-desemp"></div>
-    </div>
-    <div class="card clink" onclick="ir('desafios')">
-      <div class="ct">◈ Desafio ativo</div>
-      <div id="d-dsf"></div>
-    </div>
-  </div>
-
-  <!-- Financeiro + Plano -->
-  <div class="g2">
-    <div class="card clink" onclick="ir('financeiro')">
-      <div class="ct">◊ Financeiro do mês</div>
-      <div id="d-fin"></div>
-    </div>
-    <div class="card clink" onclick="ir('plano')">
-      <div class="ct">▷ Plano financeiro</div>
-      <div id="d-pla"></div>
-    </div>
-  </div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1238,6 +1243,7 @@ let _modalTipo = null, _editId = null, _projPreset = null;
 let _filt = { tar:'todas', cli:'todos', ent:'todas', fin:'todos', ide:'todas' };
 let _dashPeriodo = 'hoje'; // filtro do dashboard: hoje | semana | mes
 let _filtRot = 'hoje';   // filtro da tela de rotinas
+var _sheetsSincronizado = false; // true após primeiro carregarSheets() completar
 let _filtExtra = { tarPrio:'', tarArea:'', subCli:'', entCli:'', subpProj:'' };
 let _calVista = 'semana', _calOff = 0;
 let _snaps = [];
@@ -1407,6 +1413,15 @@ function carregarLocal() {
     if(d.config && typeof d.config === 'object') {
       Object.assign(DB.config, d.config);
     }
+    // Normalizar campos JSON que podem ter sido salvos como string
+    if(Array.isArray(DB.desafios)) {
+      DB.desafios.forEach(function(d) {
+        if(typeof d.dias === 'string' && d.dias.trim().startsWith('[')) {
+          try { d.dias = JSON.parse(d.dias); } catch(e) { d.dias = []; }
+        }
+        if(!Array.isArray(d.dias)) d.dias = [];
+      });
+    }
     return true;
   } catch(e) {
     console.warn('[YM] erro ao carregar localStorage:', e);
@@ -1511,10 +1526,19 @@ function carregarSheets() {
 
       console.log('[YM] Sheets merge: +' + novosRegistros + ' registros novos do Sheets');
 
+      // Normalizar campos JSON (arrays salvos como string no Sheets)
+      DB.desafios.forEach(function(d) {
+        if(typeof d.dias === 'string' && d.dias.trim().startsWith('[')) {
+          try { d.dias = JSON.parse(d.dias); } catch(e) { d.dias = []; }
+        }
+        if(!Array.isArray(d.dias)) d.dias = [];
+      });
+
       // Salva o merge no localStorage
       try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e){}
 
       console.log('[YM] SHEETS OK');
+      _sheetsSincronizado = true;
       setLoader(''); setSyncDot('ok');
       return true;
     })
@@ -1671,215 +1695,226 @@ function updateFAB(sec) {
 // ──────────────────────────────────────────────────────────────
 function renderDash() {
   console.log('[YM] renderDash() called | clientes:', DB.clientes.length, '| tarefas:', DB.tarefas.length, '| fin:', DB.financeiro.length);
-  // Guards de segurança — nunca falha com undefined
   SYNC_KEYS.forEach(function(k){ if(!Array.isArray(DB[k])) DB[k] = []; });
-  const h = new Date().getHours();
-  $('dash-saudacao').textContent = (h<12?'Bom dia':h<18?'Boa tarde':'Boa noite') + ', ' + (DB.config.nome_usuario||'YM') + '!';
 
-  const hj = hoje();
-  const mesAtual = hj.slice(0,7);
-  // Tarefas filtradas por período do dashboard
-  var _dpStats = getDashDatas();
-  const tarHj   = DB.tarefas.filter(function(t){
+  var h  = new Date().getHours();
+  var hj = hoje();
+  var mesAtual = hj.slice(0,7);
+
+  // Saudação e data
+  var _saud = $('dash-saudacao');
+  if(_saud) _saud.textContent = (h<12?'Bom dia':h<18?'Boa tarde':'Boa noite') + ', ' + (DB.config.nome_usuario||'YM') + '!';
+  var _dataDash = $('hdr-date-dash');
+  if(_dataDash) _dataDash.textContent = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+
+  // ── Dados do período ──────────────────────────────────────
+  var _dp = getDashDatas();
+
+  // Tarefas do período
+  var tarPeriodo = DB.tarefas.filter(function(t){
     return isDentroDoPeríodo(t.vencimento) && t.status !== 'concluida';
   });
-  const tarConc  = DB.tarefas.filter(function(t){
+  var tarConc = DB.tarefas.filter(function(t){
     return isDentroDoPeríodo(t.vencimento) && t.status === 'concluida';
   });
-  const atras    = DB.tarefas.filter(t=>atrasado(t.vencimento)&&t.status!=='concluida');
-  const entAbrt  = DB.entregas.filter(e=>e.status!=='concluida'&&e.status!=='cancelada');
-  const recMes   = DB.financeiro.filter(f=>f.tipo==='entrada'&&f.status==='concluido'&&f.data?.slice(0,7)===mesAtual)
-                     .reduce((a,f)=>a+Number(f.valor_liquido||f.valor_bruto||0),0);
-  const habHj    = DB.habitos.find(hb=>hb.data===hj)||{};
-  const habKeys  = ['exercicio','alimentacao','meditacao','alcool_nao'];
-  // Para período: conta % de dias com todos os hábitos
+  var tarAtras = DB.tarefas.filter(function(t){
+    return atrasado(t.vencimento) && t.status !== 'concluida';
+  });
+  var tarTotal = tarPeriodo.length + tarConc.length;
+
+  // Hábitos do período
+  var habHj   = DB.habitos.find(function(hb){ return hb.data === hj; }) || {};
+  var habKeys = ['exercicio','alimentacao','meditacao','alcool_nao'];
   var habOk, habTotal;
   if(_dashPeriodo === 'hoje') {
-    habOk = habKeys.filter(function(k){ return boolTrue(habHj[k]); }).length;
+    habOk    = habKeys.filter(function(k){ return boolTrue(habHj[k]); }).length;
     habTotal = habKeys.length;
   } else {
-    var _habPeriodo = DB.habitos.filter(function(h){ return isDentroDoPeríodo(h.data); });
-    var _habDias = _habPeriodo.length || 1;
-    habOk = _habPeriodo.filter(function(h){
-      return habKeys.filter(function(k){ return boolTrue(h[k]); }).length === habKeys.length;
+    var _habP = DB.habitos.filter(function(hb){ return isDentroDoPeríodo(hb.data); });
+    habOk    = _habP.filter(function(hb){
+      return habKeys.filter(function(k){ return boolTrue(hb[k]); }).length === habKeys.length;
     }).length;
-    habTotal = _habDias;
+    habTotal = Math.max(_habP.length, 1);
   }
 
-  R('d-stats',`
-    <div class="stat" style="cursor:pointer" onclick="ir('habitos')">
-      <div class="slbl">Hábitos ${_dpStats.label}</div>
-      <div class="sval">${habOk}/${habTotal}</div>
-      <div class="ssub">${_dashPeriodo==='hoje'?'checklist diário':'dias completos'}</div>
-    </div>
-    <div class="stat" style="cursor:pointer" onclick="ir('tarefas')">
-      <div class="slbl">Tarefas ${_dpStats.label}</div>
-      <div class="sval">${tarHj.length}</div>
-      <div class="ssub">${tarConc.length} concluídas · ${atras.length} atrasada(s)</div>
-    </div>
-    <div class="stat" style="cursor:pointer" onclick="ir('entregas')">
-      <div class="slbl">Entregas abertas</div>
-      <div class="sval">${entAbrt.length}</div>
-      <div class="ssub">${DB.clientes.filter(c=>c.status==='ativo').length} clientes ativos</div>
-    </div>
-    <div class="stat" style="cursor:pointer" onclick="ir('financeiro')">
-      <div class="slbl">Recebido no mês</div>
-      <div class="sval" style="font-size:16px">${moeda(recMes)}</div>
-      <div class="ssub">Meta: ${moeda(DB.config.meta_vendas)}</div>
-    </div>
-  `);
-
-  // Hábitos
-  const metaDiaD = calcMeta();
-  const calD = Number(habHj.calorias||0), gasD = Number(habHj.calorias_gastas||ATIV_KCAL[habHj.atividade]||0);
-  const saldoD = metaDiaD > 0 && calD > 0 ? calD-(metaDiaD+gasD) : null;
-  R('d-hab', habKeys.map((k,i)=>{
-    const lb = ['Exercício','Alimentação saudável','Meditação','Sem álcool'][i];
-    const ok = boolTrue(habHj[k]);
-    return `<div class="hab">
-      <div class="hchk ${ok?'done':''}" onclick="toggleHabRap('${k}')">${ok?'✓':''}</div>
-      <span style="font-size:13px">${lb}</span>
-    </div>`;
-  }).join('') + (habHj.agua?`<div style="font-size:11px;color:var(--muted);margin-top:6px">💧 ${habHj.agua}L${habHj.peso?' · ⚖ '+habHj.peso+'kg':''}</div>`:'') + (saldoD!==null?`<div style="font-size:11px;margin-top:4px;font-weight:600;color:${saldoD>200?'var(--err)':saldoD<-200?'var(--info)':'var(--ok)'}">Cal: ${saldoD>0?'+'+saldoD:saldoD} kcal</div>`:''));
-
-  // Rotina
-  const rot = DB.tarefas.filter(t=>t.area==='ROTINA'&&ehHoje(t.vencimento)&&t.status!=='concluida');
-  R('d-rot', rot.length ? rot.slice(0,4).map(t=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1;font-size:13px">${t.titulo||'—'}</div>
-      ${badgeStatus(t.status)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem compromissos de rotina hoje.</div>');
-
-  // Tarefas
-  const tshow = [...atras.map(t=>({...t,_late:true})),...tarHj].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).slice(0,6);
-  R('d-tar', tshow.length ? tshow.map(t=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1;font-size:13px;${t._late?'color:var(--err)':''}">${t.titulo||'—'}</div>
-      ${t._late?badge('atrasada','br'):''}${badgePrio(t.prioridade)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem tarefas para hoje. 🎉</div>');
-
-  // Entregas
-  const cliMap = Object.fromEntries(DB.clientes.map(c=>[c.id,c.nome]));
-  R('d-ent', entAbrt.length ? entAbrt.slice(0,4).map(e=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${e.tipo_entrega||'—'}</div>
-      <div style="font-size:11px;color:var(--muted)">${cliMap[e.cliente_id]||'—'} · ${fmtData(e.prazo_entrega)}</div></div>
-      ${badgeStatus(e.status)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem entregas em aberto.</div>');
-
-  // Clientes
-  const ativos = DB.clientes.filter(c=>c.status==='ativo').slice(0,4);
-  R('d-cli', ativos.length ? ativos.map(c=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${c.nome||'—'}</div>
-      <div style="font-size:11px;color:var(--muted)">${c.proxima_acao||'—'}</div></div>
-      ${badgeStatus(c.status)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem clientes ativos.</div>');
-
-  // Projetos
-  const projs = DB.projetos.filter(p=>p.status==='em andamento').slice(0,3);
-  R('d-pro', projs.length ? projs.map(p=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1;font-size:13px;font-weight:500">${p.nome||'—'}</div>
-      ${badgePrio(p.prioridade)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem projetos em andamento.</div>');
-
-  // Ideias
-  const ides = [...DB.ideias].filter(i=>i.status==='novo')
-    .sort((a,b)=>(b.criado_em||'').localeCompare(a.criado_em||'')).slice(0,4);
-  R('d-ide', ides.length ? ides.map(i=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      ${badge(i.tipo||'—','bb')}
-      <div style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.conteudo||'—'}</div>
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem capturas recentes.</div>');
-
-  // Financeiro
-  const meta = Number(DB.config.meta_vendas||0);
-  const pct = meta ? Math.min(100,Math.round(recMes/meta*100)) : 0;
-  const pendFin = DB.financeiro.filter(f=>f.status==='previsto'&&f.tipo==='entrada').slice(0,3);
-
-  // ── Card de Rotinas (usa _dashPeriodo) ───────────────────
-  var _dp = getDashDatas();
-  var _desemp = calcDesempenhoRotinas(_dp.inicio, _dp.fim);
+  // Rotinas do período
+  var _desemp  = calcDesempenhoRotinas(_dp.inicio, _dp.fim);
   var _rotHoje = rotinasDoDia(hj);
-  R('d-rot-desemp', _rotHoje.length ?
-    '<div style="margin-bottom:8px">' +
-    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">' +
-    '<span>' + _dp.label + '</span>' +
-    '<span style="font-weight:700;color:var(--accent)">' + _desemp.pct + '%</span></div>' +
-    '<div class="pbar"><div class="pfill" style="width:' + _desemp.pct + '%"></div></div>' +
-    '<div style="font-size:11px;color:var(--muted);margin-top:3px">' +
-    _desemp.cumpridos + '/' + _desemp.planejados + ' blocos cumpridos</div></div>' +
-    _rotHoje.map(function(r) {
-      var reg = getRotReg(r.id, hj);
-      var st = reg ? reg.status : 'pendente';
-      var cor = st === 'cumprida' ? 'var(--ok)' : st === 'parcial' ? 'var(--warn)' : 'var(--border)';
-      return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">' +
-        '<div style="width:8px;height:8px;border-radius:50%;background:' + cor + ';flex-shrink:0"></div>' +
-        '<div style="flex:1;font-size:13px">' + r.titulo + '</div>' +
-        (r.hora_inicio ? '<span style="font-size:11px;color:var(--muted)">' + r.hora_inicio + '</span>' : '') +
-        '</div>';
-    }).join('') :
-    '<div style="font-size:13px;color:var(--light);padding:6px 0">Nenhuma rotina para hoje.' +
-    '<br><button class="btn bsm" style="margin-top:6px" onclick="abrirModal(&apos;rotina&apos;)">+ Criar rotina</button></div>');
 
-  // ── Card do Desafio ativo ────────────────────────────────
-  var _dsfAtivo = DB.desafios.length ? (DB.desafios.find(function(d){ return d.data_fim >= hj; }) || DB.desafios[0]) : null;
+  // ══ BLOCO 1: TERMÔMETRO DO DIA ═══════════════════════════
+  var habPct = habTotal > 0 ? Math.round(habOk/habTotal*100) : 0;
+  var rotPct = _desemp.pct;
+  var tarPct = tarTotal > 0 ? Math.round(tarConc.length/tarTotal*100) : 0;
+
+  R('d-termometro',
+    '<div class="termo-card hab" onclick="ir(\'habitos\')">' +
+      '<div class="termo-lbl">Hábitos</div>' +
+      '<div class="termo-num">' + habOk + '<span style="font-size:13px;font-weight:500;color:var(--muted)">/' + habTotal + '</span></div>' +
+      '<div class="termo-sub">' + (_dashPeriodo==='hoje' ? 'checklist' : 'dias completos') + '</div>' +
+      '<div class="termo-pbar"><div class="termo-pfill" style="width:' + habPct + '%;background:#0f766e"></div></div>' +
+    '</div>' +
+    '<div class="termo-card rot" onclick="ir(\'rotinas\')">' +
+      '<div class="termo-lbl">Rotinas</div>' +
+      '<div class="termo-num">' + _desemp.cumpridos + '<span style="font-size:13px;font-weight:500;color:var(--muted)">/' + _desemp.planejados + '</span></div>' +
+      '<div class="termo-sub">blocos cumpridos</div>' +
+      '<div class="termo-pbar"><div class="termo-pfill" style="width:' + rotPct + '%;background:var(--accent)"></div></div>' +
+    '</div>' +
+    '<div class="termo-card tar" onclick="ir(\'tarefas\')">' +
+      '<div class="termo-lbl">Tarefas</div>' +
+      '<div class="termo-num">' + tarConc.length + '<span style="font-size:13px;font-weight:500;color:var(--muted)">/' + tarTotal + '</span></div>' +
+      '<div class="termo-sub">' + (tarAtras.length > 0 ? tarAtras.length + ' atrasada(s)' : 'em dia \u2713') + '</div>' +
+      '<div class="termo-pbar"><div class="termo-pfill" style="width:' + tarPct + '%;background:#7c3aed"></div></div>' +
+    '</div>'
+  );
+
+  // ══ BLOCO 2: DESAFIO ATIVO ════════════════════════════════
+  var _dsfWrap = $('d-dsf-wrap');
+  var _dsfAtivo = DB.desafios.length
+    ? (DB.desafios.find(function(d){ return d.data_fim >= hj; }) || DB.desafios[0])
+    : null;
   if(_dsfAtivo) {
-    var _dias = _dsfAtivo.dias || [];
-    var _total = _dias.length;
+    if(_dsfWrap) _dsfWrap.style.display = '';
+    var _dias   = Array.isArray(_dsfAtivo.dias) ? _dsfAtivo.dias : [];
+    var _total  = _dias.length;
     var _feitos = _dias.filter(function(d){ return d.status === 'ok'; }).length;
     var _pctDsf = _total > 0 ? Math.round(_feitos/_total*100) : 0;
     var _diaAtual = _dias.find(function(d){ return d.data === hj; });
-    var _diaNum = _diaAtual ? _diaAtual.numero : _dias.filter(function(d){ return d.data <= hj; }).length;
-    var _restam = _dias.filter(function(d){ return d.data > hj; }).length;
-    var _corDsf = _dsfAtivo.cor || 'var(--accent)';
+    var _diaNum   = _diaAtual ? _diaAtual.numero : _dias.filter(function(d){ return d.data <= hj; }).length;
+    var _restam   = _dias.filter(function(d){ return d.data > hj; }).length;
+    var _corDsf   = _dsfAtivo.cor || 'var(--accent)';
+    if(_dsfWrap) _dsfWrap.style.borderLeftColor = _corDsf;
     R('d-dsf',
-      '<div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;margin-bottom:6px">' + _dsfAtivo.nome + '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
-      '<div style="text-align:center;background:#f8fafc;border-radius:6px;padding:7px">' +
-      '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:20px;color:' + _corDsf + '">' + (_diaNum||'—') + '</div>' +
-      '<div style="font-size:10px;color:var(--muted)">DIA ATUAL</div></div>' +
-      '<div style="text-align:center;background:#f8fafc;border-radius:6px;padding:7px">' +
-      '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:20px;color:var(--ok)">' + _pctDsf + '%</div>' +
-      '<div style="font-size:10px;color:var(--muted)">CONCLUÍDO</div></div></div>' +
-      '<div class="pbar"><div class="pfill" style="width:' + _pctDsf + '%;background:' + _corDsf + '"></div></div>' +
-      '<div style="font-size:11px;color:var(--muted);margin-top:4px">Faltam ' + _restam + ' dias</div>');
+      '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:var(--navy);margin-bottom:8px">' + (_dsfAtivo.nome||'\u2014') + '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">' +
+        '<div style="text-align:center;background:#f8fafc;border-radius:var(--rs);padding:8px 4px">' +
+          '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:22px;color:' + _corDsf + ';line-height:1">' + (_diaNum||'\u2014') + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px">Dia atual</div>' +
+        '</div>' +
+        '<div style="text-align:center;background:#f8fafc;border-radius:var(--rs);padding:8px 4px">' +
+          '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:22px;color:var(--ok);line-height:1">' + _pctDsf + '%</div>' +
+          '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px">Conclu\u00eddo</div>' +
+        '</div>' +
+        '<div style="text-align:center;background:#f8fafc;border-radius:var(--rs);padding:8px 4px">' +
+          '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:22px;color:' + (_restam<10?'var(--err)':'var(--navy)') + ';line-height:1">' + _restam + '</div>' +
+          '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px">Restantes</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pbar"><div class="pfill" style="width:' + _pctDsf + '%;background:' + _corDsf + '"></div></div>'
+    );
   } else {
-    R('d-dsf', '<div style="font-size:13px;color:var(--light);padding:6px 0">Nenhum desafio ativo.' +
-      '<br><button class="btn bsm" style="margin-top:6px" onclick="abrirModal(&apos;desafio&apos;)">+ Criar desafio</button></div>');
+    if(_dsfWrap) _dsfWrap.style.display = 'none';
   }
 
-  const saidasPrevMes = DB.financeiro.filter(f=>f.tipo==='saida'&&f.status==='previsto'&&(f.data||'').slice(0,7)===mesAtual).reduce((a,f)=>a+Number(f.valor_bruto||0),0);
-  R('d-fin', `
-    <div style="margin-bottom:9px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-        <span>Meta: ${moeda(meta)}</span><span style="font-weight:700;color:var(--accent)">${pct}%</span>
-      </div>
-      <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px">
-        <span>Faltam ${moeda(Math.max(0,meta-recMes))}</span>
-        ${saidasPrevMes>0?`<span style="color:var(--err)">↓ ${moeda(saidasPrevMes)} a pagar</span>`:''}
-      </div>
-    </div>` +
-    pendFin.map(f=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1;font-size:12px">${f.descricao||'—'}</div>
-      <span style="font-weight:600;font-size:12px;color:${f.tipo==='entrada'?'var(--ok)':'var(--err)'}">${moeda(f.valor_bruto)}</span>
-      ${badgeStatus(f.status)}
-    </div>`).join(''));
+  // ══ BLOCO 3a: HÁBITOS ════════════════════════════════════
+  var _habCt = $('d-hab-ct');
+  if(_habCt) _habCt.textContent = '\u25ce H\u00e1bitos \u2014 ' + _dp.label;
+  var metaDiaD = calcMeta();
+  var calD  = Number(habHj.calorias||0);
+  var gasD  = Number(habHj.calorias_gastas||ATIV_KCAL[habHj.atividade]||0);
+  var saldoD = metaDiaD > 0 && calD > 0 ? calD-(metaDiaD+gasD) : null;
+  R('d-hab', habKeys.map(function(k,i){
+    var lb = ['Exerc\u00edcio','Alimenta\u00e7\u00e3o saud\u00e1vel','Medita\u00e7\u00e3o','Sem \u00e1lcool'][i];
+    var ok = boolTrue(habHj[k]);
+    return '<div class="hab">' +
+      '<div class="hchk ' + (ok?'done':'') + '" onclick="toggleHabRap(\'' + k + '\')">' + (ok?'\u2713':'') + '</div>' +
+      '<span style="font-size:13px">' + lb + '</span>' +
+    '</div>';
+  }).join('') +
+  (habHj.agua ? '<div style="font-size:11px;color:var(--muted);margin-top:6px">\ud83d\udca7 ' + habHj.agua + 'L' + (habHj.peso?' \u00b7 \u2696 '+habHj.peso+'kg':'') + '</div>' : '') +
+  (saldoD!==null ? '<div style="font-size:11px;margin-top:4px;font-weight:600;color:' + (saldoD>200?'var(--err)':saldoD<-200?'var(--info)':'var(--ok)') + '">Cal: ' + (saldoD>0?'+'+saldoD:saldoD) + ' kcal</div>' : ''));
 
-  // Plano
-  const planos = [...DB.planoFin].filter(p=>p.status==='previsto')
-    .sort((a,b)=>({urgente:0,alta:1,media:2,baixa:3}[a.prioridade]||4)-({urgente:0,alta:1,media:2,baixa:3}[b.prioridade]||4)).slice(0,4);
-  R('d-pla', planos.length ? planos.map(p=>`
-    <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.objetivo||'—'}</div>
-      <div style="font-size:11px;color:var(--muted)">${p.acao||'—'}</div></div>
-      ${badgePrio(p.prioridade)}
-    </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem ações financeiras pendentes.</div>');
+  // ══ BLOCO 3b: ROTINAS ════════════════════════════════════
+  var _rotCt = $('d-rot-ct');
+  if(_rotCt) _rotCt.textContent = '\u23f1 Rotinas \u2014 ' + _dp.label;
+  R('d-rot-desemp',
+    _rotHoje.length ?
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">' +
+        '<span style="color:var(--muted)">' + _desemp.cumpridos + '/' + _desemp.planejados + ' blocos</span>' +
+        '<span style="font-weight:700;color:var(--accent)">' + _desemp.pct + '%</span>' +
+      '</div>' +
+      '<div class="pbar" style="margin-bottom:8px"><div class="pfill" style="width:' + _desemp.pct + '%"></div></div>' +
+      _rotHoje.map(function(r) {
+        var reg = getRotReg(r.id, hj);
+        var st  = reg ? reg.status : 'pendente';
+        var cor = st==='cumprida' ? 'var(--ok)' : st==='parcial' ? 'var(--warn)' : '#e2e8f0';
+        var horaStr = r.hora_inicio ? r.hora_inicio + (r.hora_fim?' \u2013 '+r.hora_fim:'') : '';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1f5f9;min-height:40px">' +
+          '<div style="width:10px;height:10px;border-radius:50%;background:' + cor + ';flex-shrink:0;border:1px solid ' + (st==='pendente'?'var(--border)':cor) + '"></div>' +
+          '<div style="flex:1">' +
+            '<div style="font-size:13px;font-weight:500">' + r.titulo + '</div>' +
+            (horaStr ? '<div style="font-size:11px;color:var(--muted)">' + horaStr + '</div>' : '') +
+          '</div>' +
+          '<button onclick="toggleRotinaDia(\'' + r.id + '\',\'' + hj + '\')" ' +
+            'style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid ' + cor + ';' +
+            'background:' + (st==='pendente'?'transparent':cor) + ';' +
+            'color:' + (st==='pendente'?'var(--muted)':'#fff') + ';cursor:pointer;min-height:28px">' +
+            (st==='cumprida'?'\u2713':st==='parcial'?'~':'\u25ef') +
+          '</button>' +
+        '</div>';
+      }).join('') :
+      (_sheetsSincronizado
+        ? '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem rotinas para hoje.<br><button class="btn bsm" style="margin-top:8px" onclick="abrirModal(&apos;rotina&apos;)">+ Criar rotina</button></div>'
+        : '<div style="font-size:13px;color:var(--muted);padding:6px 0">\u27f3 Carregando rotinas...</div>')
+  );
+
+  // ══ BLOCO 3c: TAREFAS ════════════════════════════════════
+  var _tarCt = $('d-tar-ct');
+  if(_tarCt) _tarCt.textContent = '\u2713 Tarefas \u2014 ' + _dp.label;
+  var tshow = tarAtras.map(function(t){ return Object.assign({}, t, {_late:true}); })
+    .concat(tarPeriodo)
+    .filter(function(t,i,a){ return a.findIndex(function(x){ return x.id===t.id; }) === i; })
+    .slice(0,7);
+  R('d-tar', tshow.length ? tshow.map(function(t){
+    return '<div style="display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid #f1f5f9;min-height:40px">' +
+      '<div style="flex:1;font-size:13px' + (t._late?';color:var(--err)':'') + '">' + (t.titulo||'\u2014') + '</div>' +
+      (t._late ? badge('atrasada','br') : '') + badgePrio(t.prioridade) +
+    '</div>';
+  }).join('') : '<div style="font-size:13px;color:var(--light);padding:8px 0">Sem tarefas para o per\u00edodo. \ud83c\udf89</div>');
+
+  // ══ BLOCO 4: FINANCEIRO RESUMIDO ═════════════════════════
+  var recMes = DB.financeiro.filter(function(f){
+    return f.tipo==='entrada' && f.status==='concluido' && (f.data||'').slice(0,7)===mesAtual;
+  }).reduce(function(a,f){ return a+Number(f.valor_liquido||f.valor_bruto||0); }, 0);
+  var aReceberMes = DB.financeiro.filter(function(f){
+    return f.tipo==='entrada' && f.status==='previsto' && (f.data||'').slice(0,7)===mesAtual;
+  }).reduce(function(a,f){ return a+Number(f.valor_bruto||0); }, 0);
+  var aPagarMes = DB.financeiro.filter(function(f){
+    return f.tipo==='saida' && f.status==='previsto' && (f.data||'').slice(0,7)===mesAtual;
+  }).reduce(function(a,f){ return a+Number(f.valor_bruto||0); }, 0);
+  var meta   = Number(DB.config.meta_vendas||0);
+  var pct    = meta ? Math.min(100, Math.round(recMes/meta*100)) : 0;
+
+  R('d-fin',
+    '<div class="fin-resumo">' +
+      '<div class="fin-item recebido">' +
+        '<div class="fin-item-val">' + moeda(recMes) + '</div>' +
+        '<div class="fin-item-lbl">Recebido</div>' +
+      '</div>' +
+      '<div class="fin-item pct">' +
+        '<div class="fin-item-val">' + pct + '%</div>' +
+        '<div class="fin-item-lbl">Da meta</div>' +
+      '</div>' +
+      '<div class="fin-item areceber">' +
+        '<div class="fin-item-val">' + moeda(aReceberMes) + '</div>' +
+        '<div class="fin-item-lbl">A receber</div>' +
+      '</div>' +
+      '<div class="fin-item apagar">' +
+        '<div class="fin-item-val">' + moeda(aPagarMes) + '</div>' +
+        '<div class="fin-item-lbl">A pagar</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="pbar">' +
+      '<div class="pfill" style="width:' + pct + '%"></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px">' +
+      '<span>Meta: ' + moeda(meta) + '</span>' +
+      '<span>Faltam ' + moeda(Math.max(0,meta-recMes)) + '</span>' +
+    '</div>'
+  );
+
   console.log('[YM] DASHBOARD OK');
 }
+
 
 function toggleHabRap(chave) {
   const hj = hoje();
@@ -3159,10 +3194,10 @@ const SCHEMAS = {
   subtarefasProj: {req:['subtarefa'],     cols:['id','projeto_id','tarefa_principal','subtarefa','responsavel','prazo','prioridade','status','observacao','criado_em']},
   financeiro:     {req:['descricao'],     cols:['id','tipo_financeiro','tipo','descricao','valor_bruto','comissao','custo','valor_liquido','data','categoria','status','forma_pagamento','origem','cliente_id','observacao','criado_em']},
   planoFin:       {req:['objetivo'],      cols:['id','tipo_financeiro','objetivo','acao','valor_estimado','prazo','prioridade','status','observacoes','criado_em']},
-  habitos:        {req:['data'],          cols:['id','data','agua','exercicio','alimentacao','meditacao','alcool_nao','peso','calorias','obs','criado_em']},
+  habitos:        {req:['data'],          cols:['id','data','agua','exercicio','alimentacao','meditacao','alcool_nao','peso','calorias','calorias_gastas','atividade','obs','criado_em']},
   ideias:         {req:['conteudo'],      cols:['id','tipo','conteudo','area','prioridade','status','criado_em']},
   eventos:        {req:['titulo','data'],  cols:['id','titulo','tipo','data','hora_inicio','hora_fim','descricao','prioridade','status','categoria','criado_em']},
-  desafios:       {req:['nome','data_inicio','data_fim'], cols:['id','nome','data_inicio','data_fim','total_dias','regras','metas','habitos_obrigatorios','cor','criado_em']},
+  desafios:       {req:['nome','data_inicio','data_fim'], cols:['id','nome','data_inicio','data_fim','total_dias','regras','metas','habitos_obrigatorios','cor','dias','criado_em']},
   rotinas:        {req:['titulo'],     cols:['id','titulo','periodo','hora_inicio','hora_fim','dias_semana','categoria','atividades','status','observacoes','criado_em']},
   rotinaRegistros:{req:['rotina_id','data'], cols:['id','rotina_id','data','status','nota','criado_em']}
 };
@@ -3898,9 +3933,7 @@ function init(){
   if(DB.config.sheets_url){
     carregarSheets().then(function(ok){
       if(ok){
-        // Re-inserir dados reais caso IDs tenham mudado
-        carregarDadosReais();
-        // Re-renderiza dashboard sempre
+        // Re-renderiza dashboard com dados do Sheets
         renderDash();
         // Re-renderiza a tela ativa se não for o dashboard
         var secAtiva = document.querySelector('.section.active');
