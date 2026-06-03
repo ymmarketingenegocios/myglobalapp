@@ -471,6 +471,37 @@ textarea{resize:vertical;min-height:62px}
 .met-warn{background:var(--warn-bg);border-color:var(--warn)}
 .met-err{background:var(--err-bg);border-color:var(--err)}
 
+
+/* ═══ ROTINAS ══════════════════════════════════════════════ */
+.rot-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);
+  box-shadow:var(--shadow);padding:14px 16px;border-left:4px solid var(--accent)}
+.rot-card.cumprida{border-left-color:var(--ok);opacity:.85}
+.rot-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.rot-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--navy)}
+.rot-time{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+.rot-atividades{font-size:12px;color:var(--muted);margin:6px 0;line-height:1.6}
+.rot-footer{display:flex;align-items:center;gap:8px;margin-top:10px;
+  padding-top:8px;border-top:1px solid var(--border)}
+.rot-check-btn{padding:6px 14px;border-radius:var(--rs);border:none;cursor:pointer;
+  font-size:12px;font-weight:600;font-family:'Inter',sans-serif;transition:all .15s;min-height:36px}
+.rot-check-btn.cumprida{background:var(--ok);color:#fff}
+.rot-check-btn.parcial{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn)}
+.rot-check-btn.pendente{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
+/* Desempenho */
+.desemp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.desemp-item{text-align:center;padding:10px 6px;background:#f8fafc;
+  border-radius:var(--rs);border:1px solid var(--border)}
+.desemp-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:20px;
+  color:var(--navy);line-height:1}
+.desemp-lbl{font-size:10px;color:var(--muted);margin-top:3px;
+  text-transform:uppercase;letter-spacing:.4px}
+/* Filtro de período no Dashboard */
+.dash-periodo{display:flex;gap:5px;margin-bottom:12px}
+.dp-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);
+  background:var(--surface);font-size:12px;font-weight:600;cursor:pointer;
+  color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif;min-height:32px}
+.dp-btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
 /* ═══ ANIMATIONS ═════════════════════════════════════════════ */
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
@@ -586,6 +617,7 @@ textarea{resize:vertical;min-height:62px}
     <div class="ns">Principal</div>
     <div class="ni on" data-sec="dashboard"><span class="ic">⬡</span>Dashboard</div>
     <div class="ni" data-sec="tarefas"><span class="ic">✓</span>Tarefas</div>
+    <div class="ni" data-sec="rotinas"><span class="ic">⏱</span>Rotinas</div>
     <div class="ni" data-sec="calendario"><span class="ic">◫</span>Agenda</div>
 
     <div class="ns">Clientes</div>
@@ -626,6 +658,13 @@ textarea{resize:vertical;min-height:62px}
   <div class="toolbar">
     <h2 id="dash-saudacao">Bom dia!</h2>
     <button class="btn bp2 bsm" onclick="abrirCaptura()">+ Captura rápida</button>
+  </div>
+
+  <!-- Filtro de período (afeta hábitos, tarefas, rotinas) -->
+  <div class="dash-periodo">
+    <button class="dp-btn on" onclick="setDashPeriodo('hoje',this)">Hoje</button>
+    <button class="dp-btn" onclick="setDashPeriodo('semana',this)">Semana</button>
+    <button class="dp-btn" onclick="setDashPeriodo('mes',this)">Mês</button>
   </div>
 
   <!-- Stats topo -->
@@ -670,6 +709,18 @@ textarea{resize:vertical;min-height:62px}
     <div class="card clink" onclick="ir('ideias')">
       <div class="ct">◌ Capturas recentes</div>
       <div id="d-ide"></div>
+    </div>
+  </div>
+
+  <!-- Rotinas + Desafio ativo -->
+  <div class="g2">
+    <div class="card clink" onclick="ir('rotinas')">
+      <div class="ct">⏱ Rotinas do dia</div>
+      <div id="d-rot-desemp"></div>
+    </div>
+    <div class="card clink" onclick="ir('desafios')">
+      <div class="ct">◈ Desafio ativo</div>
+      <div id="d-dsf"></div>
     </div>
   </div>
 
@@ -850,6 +901,27 @@ textarea{resize:vertical;min-height:62px}
       <tbody id="tb-hab"></tbody>
     </table></div>
   </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     ROTINAS
+══════════════════════════════════════════════════════════ -->
+<section id="sec-rotinas" class="section">
+  <div class="toolbar">
+    <h2>Rotinas</h2>
+    <button class="btn bp2" onclick="abrirModal('rotina')">+ Nova rotina</button>
+  </div>
+  <!-- Filtro de período -->
+  <div class="filters">
+    <span class="chip on" onclick="filtRot('hoje',this)">Hoje</span>
+    <span class="chip" onclick="filtRot('semana',this)">Esta semana</span>
+    <span class="chip" onclick="filtRot('todas',this)">Todas</span>
+  </div>
+  <!-- Painel de desempenho -->
+  <div id="rot-desempenho" class="card" style="margin-bottom:4px"></div>
+  <!-- Grid de rotinas do dia/semana -->
+  <div id="grid-rotinas"></div>
 </section>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -1126,6 +1198,8 @@ const DB = {
   ideias: [],
   eventos: [],
   desafios: [],
+  rotinas: [],
+  rotinaRegistros: [],
   config: {
     sheets_url: '',
     nome_usuario: 'YM',
@@ -1149,7 +1223,8 @@ const DB = {
 
 // Arrays sincronizáveis com Sheets
 const SYNC_KEYS = ['tarefas','clientes','subtarefas','entregas','projetos',
-                   'subtarefasProj','financeiro','planoFin','habitos','ideias','eventos','desafios'];
+                   'subtarefasProj','financeiro','planoFin','habitos','ideias',
+                   'eventos','desafios','rotinas','rotinaRegistros'];
 
 const ATIV_KCAL = {
   caminhada: 200, caminhada_rapida: 300, corrida: 450,
@@ -1161,6 +1236,8 @@ const ATIV_KCAL = {
 // ──────────────────────────────────────────────────────────────
 let _modalTipo = null, _editId = null, _projPreset = null;
 let _filt = { tar:'todas', cli:'todos', ent:'todas', fin:'todos', ide:'todas' };
+let _dashPeriodo = 'hoje'; // filtro do dashboard: hoje | semana | mes
+let _filtRot = 'hoje';   // filtro da tela de rotinas
 let _filtExtra = { tarPrio:'', tarArea:'', subCli:'', entCli:'', subpProj:'' };
 let _calVista = 'semana', _calOff = 0;
 let _snaps = [];
@@ -1366,6 +1443,10 @@ function sincSheets() {
     if(d.error) throw new Error(d.error);
     setSyncDot('ok');
     console.log('[YM] sincSheets: ok');
+    // Re-renderizar tela ativa após sync completo
+    var _sa = document.querySelector('.section.active');
+    var _sid = _sa ? _sa.id.replace('sec-','') : '';
+    if(_sid) { renderSec(_sid); }
   })
   .catch(function(e){
     setSyncDot('err');
@@ -1433,6 +1514,7 @@ function carregarSheets() {
       // Salva o merge no localStorage
       try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e){}
 
+      console.log('[YM] SHEETS OK');
       setLoader(''); setSyncDot('ok');
       return true;
     })
@@ -1542,7 +1624,7 @@ function renderSec(id) {
     dashboard:renderDash, tarefas:renderTarefas, clientes:renderClientes,
     subtarefas:renderSubtarefas, entregas:renderEntregas, projetos:renderProjetos,
     subproj:renderSubProj, financeiro:renderFinanceiro, plano:renderPlano,
-    habitos:renderHabitos, desafios:renderDesafios, calendario:renderCalendario, ideias:renderIdeias,
+    habitos:renderHabitos, desafios:renderDesafios, rotinas:renderRotinas, calendario:renderCalendario, ideias:renderIdeias,
     config:renderConfig, sheets:renderSheets, importar:renderImportar, backup:renderBackup
   };
   if(m[id]) m[id]();
@@ -1565,6 +1647,7 @@ const FAB_MAP = {
   plano:      { label: '+ Ação',       action: () => abrirModal('plano') },
   habitos:    { label: '+ Hábito',     action: () => abrirModal('habito') },
   desafios:   { label: '+ Desafio',    action: () => abrirModal('desafio') },
+  rotinas:    { label: '+ Rotina',      action: () => abrirModal('rotina') },
   calendario: { label: '+ Evento',     action: () => abrirModal('evento') },
   ideias:     { label: '+ Captura',    action: () => abrirCaptura() },
   config: null, sheets: null, importar: null, backup: null,
@@ -1595,25 +1678,44 @@ function renderDash() {
 
   const hj = hoje();
   const mesAtual = hj.slice(0,7);
-  const tarHj   = DB.tarefas.filter(t=>ehHoje(t.vencimento)&&t.status!=='concluida');
+  // Tarefas filtradas por período do dashboard
+  var _dpStats = getDashDatas();
+  const tarHj   = DB.tarefas.filter(function(t){
+    return isDentroDoPeríodo(t.vencimento) && t.status !== 'concluida';
+  });
+  const tarConc  = DB.tarefas.filter(function(t){
+    return isDentroDoPeríodo(t.vencimento) && t.status === 'concluida';
+  });
   const atras    = DB.tarefas.filter(t=>atrasado(t.vencimento)&&t.status!=='concluida');
   const entAbrt  = DB.entregas.filter(e=>e.status!=='concluida'&&e.status!=='cancelada');
   const recMes   = DB.financeiro.filter(f=>f.tipo==='entrada'&&f.status==='concluido'&&f.data?.slice(0,7)===mesAtual)
                      .reduce((a,f)=>a+Number(f.valor_liquido||f.valor_bruto||0),0);
   const habHj    = DB.habitos.find(hb=>hb.data===hj)||{};
   const habKeys  = ['exercicio','alimentacao','meditacao','alcool_nao'];
-  const habOk    = habKeys.filter(k=>boolTrue(habHj[k])).length;
+  // Para período: conta % de dias com todos os hábitos
+  var habOk, habTotal;
+  if(_dashPeriodo === 'hoje') {
+    habOk = habKeys.filter(function(k){ return boolTrue(habHj[k]); }).length;
+    habTotal = habKeys.length;
+  } else {
+    var _habPeriodo = DB.habitos.filter(function(h){ return isDentroDoPeríodo(h.data); });
+    var _habDias = _habPeriodo.length || 1;
+    habOk = _habPeriodo.filter(function(h){
+      return habKeys.filter(function(k){ return boolTrue(h[k]); }).length === habKeys.length;
+    }).length;
+    habTotal = _habDias;
+  }
 
   R('d-stats',`
     <div class="stat" style="cursor:pointer" onclick="ir('habitos')">
-      <div class="slbl">Hábitos hoje</div>
-      <div class="sval">${habOk}/${habKeys.length}</div>
-      <div class="ssub">Checklist diário</div>
+      <div class="slbl">Hábitos ${_dpStats.label}</div>
+      <div class="sval">${habOk}/${habTotal}</div>
+      <div class="ssub">${_dashPeriodo==='hoje'?'checklist diário':'dias completos'}</div>
     </div>
     <div class="stat" style="cursor:pointer" onclick="ir('tarefas')">
-      <div class="slbl">Tarefas hoje</div>
+      <div class="slbl">Tarefas ${_dpStats.label}</div>
       <div class="sval">${tarHj.length}</div>
-      <div class="ssub">${atras.length} atrasada(s)</div>
+      <div class="ssub">${tarConc.length} concluídas · ${atras.length} atrasada(s)</div>
     </div>
     <div class="stat" style="cursor:pointer" onclick="ir('entregas')">
       <div class="slbl">Entregas abertas</div>
@@ -1695,6 +1797,59 @@ function renderDash() {
   const meta = Number(DB.config.meta_vendas||0);
   const pct = meta ? Math.min(100,Math.round(recMes/meta*100)) : 0;
   const pendFin = DB.financeiro.filter(f=>f.status==='previsto'&&f.tipo==='entrada').slice(0,3);
+
+  // ── Card de Rotinas (usa _dashPeriodo) ───────────────────
+  var _dp = getDashDatas();
+  var _desemp = calcDesempenhoRotinas(_dp.inicio, _dp.fim);
+  var _rotHoje = rotinasDoDia(hj);
+  R('d-rot-desemp', _rotHoje.length ?
+    '<div style="margin-bottom:8px">' +
+    '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">' +
+    '<span>' + _dp.label + '</span>' +
+    '<span style="font-weight:700;color:var(--accent)">' + _desemp.pct + '%</span></div>' +
+    '<div class="pbar"><div class="pfill" style="width:' + _desemp.pct + '%"></div></div>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:3px">' +
+    _desemp.cumpridos + '/' + _desemp.planejados + ' blocos cumpridos</div></div>' +
+    _rotHoje.map(function(r) {
+      var reg = getRotReg(r.id, hj);
+      var st = reg ? reg.status : 'pendente';
+      var cor = st === 'cumprida' ? 'var(--ok)' : st === 'parcial' ? 'var(--warn)' : 'var(--border)';
+      return '<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9">' +
+        '<div style="width:8px;height:8px;border-radius:50%;background:' + cor + ';flex-shrink:0"></div>' +
+        '<div style="flex:1;font-size:13px">' + r.titulo + '</div>' +
+        (r.hora_inicio ? '<span style="font-size:11px;color:var(--muted)">' + r.hora_inicio + '</span>' : '') +
+        '</div>';
+    }).join('') :
+    '<div style="font-size:13px;color:var(--light);padding:6px 0">Nenhuma rotina para hoje.' +
+    '<br><button class="btn bsm" style="margin-top:6px" onclick="abrirModal(&apos;rotina&apos;)">+ Criar rotina</button></div>');
+
+  // ── Card do Desafio ativo ────────────────────────────────
+  var _dsfAtivo = DB.desafios.length ? (DB.desafios.find(function(d){ return d.data_fim >= hj; }) || DB.desafios[0]) : null;
+  if(_dsfAtivo) {
+    var _dias = _dsfAtivo.dias || [];
+    var _total = _dias.length;
+    var _feitos = _dias.filter(function(d){ return d.status === 'ok'; }).length;
+    var _pctDsf = _total > 0 ? Math.round(_feitos/_total*100) : 0;
+    var _diaAtual = _dias.find(function(d){ return d.data === hj; });
+    var _diaNum = _diaAtual ? _diaAtual.numero : _dias.filter(function(d){ return d.data <= hj; }).length;
+    var _restam = _dias.filter(function(d){ return d.data > hj; }).length;
+    var _corDsf = _dsfAtivo.cor || 'var(--accent)';
+    R('d-dsf',
+      '<div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;margin-bottom:6px">' + _dsfAtivo.nome + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div style="text-align:center;background:#f8fafc;border-radius:6px;padding:7px">' +
+      '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:20px;color:' + _corDsf + '">' + (_diaNum||'—') + '</div>' +
+      '<div style="font-size:10px;color:var(--muted)">DIA ATUAL</div></div>' +
+      '<div style="text-align:center;background:#f8fafc;border-radius:6px;padding:7px">' +
+      '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:20px;color:var(--ok)">' + _pctDsf + '%</div>' +
+      '<div style="font-size:10px;color:var(--muted)">CONCLUÍDO</div></div></div>' +
+      '<div class="pbar"><div class="pfill" style="width:' + _pctDsf + '%;background:' + _corDsf + '"></div></div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:4px">Faltam ' + _restam + ' dias</div>');
+  } else {
+    R('d-dsf', '<div style="font-size:13px;color:var(--light);padding:6px 0">Nenhum desafio ativo.' +
+      '<br><button class="btn bsm" style="margin-top:6px" onclick="abrirModal(&apos;desafio&apos;)">+ Criar desafio</button></div>');
+  }
+
   const saidasPrevMes = DB.financeiro.filter(f=>f.tipo==='saida'&&f.status==='previsto'&&(f.data||'').slice(0,7)===mesAtual).reduce((a,f)=>a+Number(f.valor_bruto||0),0);
   R('d-fin', `
     <div style="margin-bottom:9px">
@@ -1723,6 +1878,7 @@ function renderDash() {
       <div style="font-size:11px;color:var(--muted)">${p.acao||'—'}</div></div>
       ${badgePrio(p.prioridade)}
     </div>`).join('') : '<div style="font-size:13px;color:var(--light);padding:6px 0">Sem ações financeiras pendentes.</div>');
+  console.log('[YM] DASHBOARD OK');
 }
 
 function toggleHabRap(chave) {
@@ -2580,6 +2736,7 @@ function renderDesafios() {
     return;
   }
   grid.innerHTML = DB.desafios.map(dsf => renderCardDesafio(dsf)).join('');
+  console.log('[YM] DESAFIOS OK');
 }
 
 function renderCardDesafio(dsf) {
@@ -2683,6 +2840,188 @@ function gerarDias(dataInicio, dataFim, diasExistentes) {
   }
   return dias;
 }
+
+
+// ──────────────────────────────────────────────────────────────
+// PERÍODO DO DASHBOARD
+// ──────────────────────────────────────────────────────────────
+function setDashPeriodo(periodo, el) {
+  _dashPeriodo = periodo;
+  document.querySelectorAll('.dp-btn').forEach(function(b){ b.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  renderDash();
+}
+
+// Retorna datas do período selecionado
+function getDashDatas() {
+  var hj = hoje();
+  if(_dashPeriodo === 'hoje') {
+    return { inicio: hj, fim: hj, label: 'Hoje' };
+  }
+  if(_dashPeriodo === 'semana') {
+    var n = new Date(), seg = new Date(n);
+    seg.setDate(n.getDate() - n.getDay() + 1);
+    var dom = new Date(seg); dom.setDate(seg.getDate() + 6);
+    return {
+      inicio: normalizarData(seg), fim: normalizarData(dom),
+      label: 'Esta semana'
+    };
+  }
+  // mes
+  var mes = hj.slice(0,7);
+  return {
+    inicio: mes + '-01',
+    fim: mes + '-' + String(new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate()).padStart(2,'0'),
+    label: hj.slice(0,7)
+  };
+}
+
+function isDentroDoPeríodo(d) {
+  var n = normalizarData(d);
+  if(!n) return false;
+  var p = getDashDatas();
+  return n >= p.inicio && n <= p.fim;
+}
+
+// ──────────────────────────────────────────────────────────────
+// ROTINAS — CRUD + desempenho
+// ──────────────────────────────────────────────────────────────
+// _filtRot declared at top level
+
+// Retorna as rotinas ativas para um dia da semana (0=dom..6=sáb)
+function rotinasDoDia(ds) {
+  var dt = parseDataSegura(ds);
+  if(!dt) return [];
+  var dow = dt.getDay(); // 0=dom
+  return DB.rotinas.filter(function(r) {
+    if(r.status !== 'ativo') return false;
+    if(!r.dias_semana) return true; // sem restrição = todos os dias
+    var dias = r.dias_semana.split(',').map(function(d){ return parseInt(d.trim(), 10); });
+    return dias.indexOf(dow) >= 0;
+  });
+}
+
+// Retorna o registro de cumprimento de uma rotina em um dia
+function getRotReg(rotId, ds) {
+  return DB.rotinaRegistros.find(function(r){
+    return r.rotina_id === rotId && r.data === ds;
+  }) || null;
+}
+
+// Toggle status do registro do dia: pendente → cumprida → parcial → pendente
+function toggleRotinaDia(rotId, ds) {
+  var reg = getRotReg(rotId, ds);
+  var ciclo = ['cumprida', 'parcial', 'nao_cumprida'];
+  if(!reg) {
+    var novoReg = { id: uid(), rotina_id: rotId, data: ds, status: 'cumprida', nota: '', criado_em: hoje() };
+    DB.rotinaRegistros.push(novoReg);
+    salvarLocal();
+    salvarImediato('rotinaRegistros', novoReg);
+  } else {
+    var idx = ciclo.indexOf(reg.status);
+    reg.status = ciclo[(idx + 1) % ciclo.length];
+    salvarLocal();
+    salvarImediato('rotinaRegistros', reg);
+  }
+  renderRotinas();
+  renderDash();
+}
+
+// Calcula desempenho de rotinas no período
+function calcDesempenhoRotinas(inicio, fim) {
+  var dias = [], cur = new Date(inicio + 'T12:00:00'), end = new Date(fim + 'T12:00:00');
+  while(cur <= end) { dias.push(normalizarData(cur)); cur.setDate(cur.getDate()+1); }
+
+  var planejados = 0, cumpridos = 0, parciais = 0;
+  dias.forEach(function(ds) {
+    var rots = rotinasDoDia(ds);
+    rots.forEach(function(r) {
+      planejados++;
+      var reg = getRotReg(r.id, ds);
+      if(reg && reg.status === 'cumprida') cumpridos++;
+      else if(reg && reg.status === 'parcial') parciais++;
+    });
+  });
+
+  var pct = planejados > 0 ? Math.round((cumpridos + parciais * 0.5) / planejados * 100) : 0;
+  return { planejados: planejados, cumpridos: cumpridos, parciais: parciais, pct: pct };
+}
+
+function filtRot(f, el) {
+  _filtRot = f;
+  document.querySelectorAll('#sec-rotinas .chip').forEach(function(c){ c.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  renderRotinas();
+}
+
+function renderRotinas() {
+  var hj = hoje();
+  var p = _filtRot === 'semana'
+    ? { inicio: getDashDatas().inicio, fim: getDashDatas().fim }
+    : _filtRot === 'todas'
+    ? { inicio: '2020-01-01', fim: '2099-12-31' }
+    : { inicio: hj, fim: hj };
+
+  // Painel de desempenho
+  var desemp = calcDesempenhoRotinas(p.inicio, p.fim);
+  var desempHtml = '<div class="ct">⏱ Desempenho de rotinas</div>' +
+    '<div class="desemp-grid">' +
+    '<div class="desemp-item"><div class="desemp-val" style="color:var(--ok)">' + desemp.cumpridos + '</div><div class="desemp-lbl">Cumpridas</div></div>' +
+    '<div class="desemp-item"><div class="desemp-val" style="color:var(--warn)">' + desemp.parciais + '</div><div class="desemp-lbl">Parciais</div></div>' +
+    '<div class="desemp-item"><div class="desemp-val" style="color:var(--accent)">' + desemp.pct + '%</div><div class="desemp-lbl">Aderência</div></div>' +
+    '</div>' +
+    '<div style="margin-top:8px"><div class="pbar"><div class="pfill" style="width:' + desemp.pct + '%"></div></div>' +
+    '<div style="font-size:11px;color:var(--muted);margin-top:3px">' + desemp.planejados + ' blocos planejados</div></div>';
+  var deEl = document.getElementById('rot-desempenho');
+  if(deEl) deEl.innerHTML = desempHtml;
+
+  // Cards de rotinas
+  var grid = document.getElementById('grid-rotinas');
+  if(!grid) return;
+
+  var dsAlvo = _filtRot === 'hoje' ? hj : null;
+  var rotsVisiveis = dsAlvo ? rotinasDoDia(dsAlvo) : DB.rotinas.filter(function(r){ return r.status === 'ativo'; });
+
+  if(!rotsVisiveis.length) {
+    grid.innerHTML = '<div class="card empty"><div class="ei">⏱</div>' +
+      '<p>Nenhuma rotina ' + (_filtRot === 'hoje' ? 'para hoje' : 'cadastrada') + '.</p>' +
+      '<button class="btn bp2" style="margin-top:12px" onclick="abrirModal(\'rotina\')">+ Criar rotina</button></div>';
+    return;
+  }
+
+  var ds = dsAlvo || hj;
+  grid.innerHTML = rotsVisiveis.map(function(r) {
+    var reg = getRotReg(r.id, ds);
+    var statusReg = reg ? reg.status : 'pendente';
+    var horaStr = r.hora_inicio ? r.hora_inicio + (r.hora_fim ? ' → ' + r.hora_fim : '') : '';
+    var cls = statusReg === 'cumprida' ? 'cumprida' : '';
+    var btnLabel = statusReg === 'cumprida' ? '✓ Cumprida' : statusReg === 'parcial' ? '~ Parcial' : '◯ Marcar';
+    var btnCls = statusReg === 'cumprida' ? 'cumprida' : statusReg === 'parcial' ? 'parcial' : 'pendente';
+    return '<div class="rot-card ' + cls + '">' +
+      '<div class="rot-header">' +
+        '<div>' +
+          '<div class="rot-title">' + (r.titulo||'—') + '</div>' +
+          (horaStr ? '<div class="rot-time">⏰ ' + horaStr + '</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;gap:3px">' +
+          '<button class="btn bsm" onclick="abrirModal(\'rotina\',\'' + r.id + '\')">✎</button>' +
+          '<button class="btn bsm bd" onclick="excluir(\'rotina\',\'' + r.id + '\')">✕</button>' +
+        '</div>' +
+      '</div>' +
+      (r.atividades ? '<div class="rot-atividades">📋 ' + r.atividades + '</div>' : '') +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">' +
+        (r.categoria ? badge(r.categoria,'bg') : '') +
+        (r.periodo ? badge(r.periodo,'bb') : '') +
+        badgeStatus(r.status) +
+      '</div>' +
+      '<div class="rot-footer">' +
+        '<button class="rot-check-btn ' + btnCls + '" onclick="toggleRotinaDia(\'' + r.id + '\',\'' + ds + '\')">' + btnLabel + '</button>' +
+        (reg && reg.nota ? '<span style="font-size:11px;color:var(--muted)">' + reg.nota + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  console.log('[YM] ROTINAS OK');}
 
 // ──────────────────────────────────────────────────────────────
 // IDEIAS
@@ -2823,7 +3162,9 @@ const SCHEMAS = {
   habitos:        {req:['data'],          cols:['id','data','agua','exercicio','alimentacao','meditacao','alcool_nao','peso','calorias','obs','criado_em']},
   ideias:         {req:['conteudo'],      cols:['id','tipo','conteudo','area','prioridade','status','criado_em']},
   eventos:        {req:['titulo','data'],  cols:['id','titulo','tipo','data','hora_inicio','hora_fim','descricao','prioridade','status','categoria','criado_em']},
-  desafios:       {req:['nome','data_inicio','data_fim'], cols:['id','nome','data_inicio','data_fim','total_dias','regras','metas','habitos_obrigatorios','cor','criado_em']}
+  desafios:       {req:['nome','data_inicio','data_fim'], cols:['id','nome','data_inicio','data_fim','total_dias','regras','metas','habitos_obrigatorios','cor','criado_em']},
+  rotinas:        {req:['titulo'],     cols:['id','titulo','periodo','hora_inicio','hora_fim','dias_semana','categoria','atividades','status','observacoes','criado_em']},
+  rotinaRegistros:{req:['rotina_id','data'], cols:['id','rotina_id','data','status','nota','criado_em']}
 };
 // Normaliza cabeçalho: remove acentos, espaços, maiúsculas
 function normK(s){ return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\s\-\/]+/g,'_').replace(/[^a-z0-9_]/g,''); }
@@ -2975,7 +3316,8 @@ const PLURAL = {
   tarefa:'tarefas',cliente:'clientes',subtarefa:'subtarefas',entrega:'entregas',
   projeto:'projetos',subproj:'subtarefasProj',
   financeiro:'financeiro',plano:'planoFin',
-  habito:'habitos',ideia:'ideias',evento:'eventos',desafio:'desafios'
+  habito:'habitos',ideia:'ideias',evento:'eventos',desafio:'desafios',
+  rotina:'rotinas',rotinaReg:'rotinaRegistros'
 };
 
 function construirForm(tipo,id){
@@ -3169,6 +3511,41 @@ function construirForm(tipo,id){
     </div>`;
   }
 
+
+  if(tipo === 'rotina') {
+    var diasSemana = [
+      {v:'0',l:'Dom'},{v:'1',l:'Seg'},{v:'2',l:'Ter'},{v:'3',l:'Qua'},
+      {v:'4',l:'Qui'},{v:'5',l:'Sex'},{v:'6',l:'Sáb'}
+    ];
+    var diasAtivos = (v('dias_semana','1,2,3,4,5')).split(',').map(function(x){ return x.trim(); });
+    var diasHtml = diasSemana.map(function(d){
+      var on = diasAtivos.indexOf(d.v) >= 0;
+      return '<button type="button" onclick="toggleDiaSemana(this,&apos;' + d.v + '&apos;)" ' +
+        'style="padding:5px 9px;border-radius:4px;border:1px solid ' + (on?'var(--accent)':'var(--border)') + ';' +
+        'background:' + (on?'var(--accent)':'var(--surface)') + ';color:' + (on?'#fff':'var(--muted)') + ';' +
+        'font-size:12px;cursor:pointer;font-family:Inter,sans-serif;" data-dia="' + d.v + '">' + d.l + '</button>';
+    }).join('');
+    return '<div class="fg">' +
+      '<div class="fgrp full"><label>Título *</label><input name="titulo" value="' + v('titulo') + '" required placeholder="ex: Manhã produtiva"></div>' +
+      '<div class="fgrp"><label>Período</label><select name="periodo">' +
+        ['manhã','tarde','noite','integral'].map(function(p){ return '<option value="' + p + '"' + (v('periodo')===p?' selected':'') + '>' + p + '</option>'; }).join('') +
+      '</select></div>' +
+      '<div class="fgrp"><label>Categoria</label><input name="categoria" value="' + v('categoria') + '" placeholder="ex: saúde, produtividade"></div>' +
+      '<div class="fgrp"><label>Hora início</label><input type="time" name="hora_inicio" value="' + v('hora_inicio') + '"></div>' +
+      '<div class="fgrp"><label>Hora fim</label><input type="time" name="hora_fim" value="' + v('hora_fim') + '"></div>' +
+      '<div class="fgrp"><label>Status</label><select name="status">' +
+        '<option value="ativo"' + (v('status','ativo')==='ativo'?' selected':'') + '>Ativo</option>' +
+        '<option value="pausado"' + (v('status')==='pausado'?' selected':'') + '>Pausado</option>' +
+      '</select></div>' +
+      '<div class="fgrp full"><label>Atividades</label><textarea name="atividades">' + v('atividades') + '</textarea></div>' +
+      '<div class="fgrp full"><label>Dias da semana</label>' +
+        '<input type="hidden" name="dias_semana" id="dias_semana_val" value="' + v('dias_semana','1,2,3,4,5') + '">' +
+        '<div id="dias_semana_btns" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">' + diasHtml + '</div>' +
+      '</div>' +
+      '<div class="fgrp full"><label>Observações</label><textarea name="observacoes">' + v('observacoes') + '</textarea></div>' +
+    '</div>';
+  }
+
   // ideia / captura
   return `<div class="fg">
     <div class="fgrp"><label>Tipo</label>
@@ -3251,6 +3628,26 @@ function salvarModal(){
   if(_modalTipo==='subproj') renderProjetos();
   else { const a=document.querySelector('.section.active'); if(a) renderSec(a.id.replace('sec-','')); }
   _projPreset=null;
+}
+
+
+function toggleDiaSemana(btn, dia) {
+  var inp = document.getElementById('dias_semana_val');
+  if(!inp) return;
+  var dias = inp.value ? inp.value.split(',').map(function(d){ return d.trim(); }).filter(Boolean) : [];
+  var idx = dias.indexOf(dia);
+  if(idx >= 0) {
+    dias.splice(idx, 1);
+    btn.style.background = 'var(--surface)';
+    btn.style.color = 'var(--muted)';
+    btn.style.borderColor = 'var(--border)';
+  } else {
+    dias.push(dia);
+    btn.style.background = 'var(--accent)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--accent)';
+  }
+  inp.value = dias.sort().join(',');
 }
 
 function excluir(tipo,id){
@@ -3501,15 +3898,20 @@ function init(){
   if(DB.config.sheets_url){
     carregarSheets().then(function(ok){
       if(ok){
-        // Após merge com Sheets, re-inserir dados reais caso
-        // tenham vindo do Sheets mas com IDs diferentes
+        // Re-inserir dados reais caso IDs tenham mudado
         carregarDadosReais();
-        // Re-renderiza com dados atualizados
+        // Re-renderiza dashboard sempre
         renderDash();
-        console.log('[YM] Sheets sync completo | clientes:', DB.clientes.length, '| fin:', DB.financeiro.length);
+        // Re-renderiza a tela ativa se não for o dashboard
+        var secAtiva = document.querySelector('.section.active');
+        var secId = secAtiva ? secAtiva.id.replace('sec-','') : '';
+        if(secId && secId !== 'dashboard') {
+          renderSec(secId);
+        }
+        console.log('[YM] Sheets sync OK | tarefas:', DB.tarefas.length,
+          '| clientes:', DB.clientes.length, '| fin:', DB.financeiro.length);
       }
     });
-    // Não mostra banner de erro — Sheets é opcional, localStorage é a base
   }
 
   // ── 8. Auto-sync a cada 30 min ───────────────────────────
