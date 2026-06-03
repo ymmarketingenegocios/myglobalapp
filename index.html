@@ -1474,14 +1474,23 @@ function carregarSheets() {
   var url = DB.config.sheets_url;
   if(!url) return Promise.resolve(false);
   setLoader('Carregando do Google Sheets…');
-  return fetch(url + '?action=getAll')
+  return fetch(url + '?action=getAll&_t=' + Date.now(), { cache: 'no-store' })
     .then(function(r){
       if(!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
     .then(function(d){
       if(d.error) throw new Error(d.error);
-      console.log('[YM] Sheets resposta recebida');
+
+      // ── LOG: RECEPÇÃO ─────────────────────────────────────
+      var _sheetsCounts = {};
+      SYNC_KEYS.forEach(function(k){ _sheetsCounts[k] = Array.isArray(d[k]) ? d[k].length : 0; });
+      console.log('[YM] SHEETS RECEBIDOS:', JSON.stringify(_sheetsCounts));
+
+      // ── LOG: LOCAL ANTES MERGE ────────────────────────────
+      var _localBefore = {};
+      SYNC_KEYS.forEach(function(k){ _localBefore[k] = (DB[k]||[]).length; });
+      console.log('[YM] LOCAL ANTES MERGE:', JSON.stringify(_localBefore));
 
       var novosRegistros = 0;
 
@@ -1524,6 +1533,10 @@ function carregarSheets() {
         });
       }
 
+      // ── LOG: LOCAL DEPOIS MERGE ──────────────────────────
+      var _localAfter = {};
+      SYNC_KEYS.forEach(function(k){ _localAfter[k] = (DB[k]||[]).length; });
+      console.log('[YM] LOCAL DEPOIS MERGE:', JSON.stringify(_localAfter));
       console.log('[YM] Sheets merge: +' + novosRegistros + ' registros novos do Sheets');
 
       // Normalizar campos JSON (arrays salvos como string no Sheets)
@@ -3155,7 +3168,7 @@ function shTestar(){
   }
   el.style.display='block'; el.style.background='#f8fafc';
   el.style.color='var(--muted)'; el.textContent='Testando conexão…';
-  fetch(url+'?action=ping')
+  fetch(url+'?action=ping&_t='+Date.now(), { cache: 'no-store' })
     .then(function(r){ return r.json(); })
     .then(function(d){
       if(d.ok){
@@ -3933,12 +3946,19 @@ function init(){
   if(DB.config.sheets_url){
     carregarSheets().then(function(ok){
       if(ok){
+        // ── LOG: RENDER EXECUTADO ──────────────────────────
+        var _renderCounts = {};
+        SYNC_KEYS.forEach(function(k){ _renderCounts[k] = (DB[k]||[]).length; });
+        console.log('[YM] RENDER EXECUTADO — DB:', JSON.stringify(_renderCounts));
+
         // Re-renderiza dashboard com dados do Sheets
         renderDash();
         // Re-renderiza a tela ativa se não for o dashboard
         var secAtiva = document.querySelector('.section.active');
         var secId = secAtiva ? secAtiva.id.replace('sec-','') : '';
+        console.log('[YM] secAtiva:', secId);
         if(secId && secId !== 'dashboard') {
+          console.log('[YM] renderSec(' + secId + ')');
           renderSec(secId);
         }
         console.log('[YM] Sheets sync OK | tarefas:', DB.tarefas.length,
