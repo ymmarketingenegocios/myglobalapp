@@ -1520,16 +1520,20 @@ function carregarSheets() {
         });
       });
 
-      // Config: merge aditivo (nunca sobrescreve)
+      // Config: Sheets é fonte de verdade — sempre atualiza
+      // Exceto sheets_url: se local tem URL válida, preserva
+      // (evita perder conexão ao abrir em novo dispositivo)
       if(d.config && !Array.isArray(d.config)) {
         Object.keys(d.config).forEach(function(k){
           var val = d.config[k];
-          // Só adiciona se local não tem ou está vazio
-          var localVal = DB.config[k];
-          var localVazio = localVal === '' || localVal === null || localVal === undefined || localVal === 0;
-          if(localVazio && val !== '' && val !== null && val !== undefined) {
-            DB.config[k] = val;
+          if(val === '' || val === null || val === undefined) return;
+          // sheets_url: só aplica se local está vazio
+          if(k === 'sheets_url') {
+            if(!DB.config.sheets_url) DB.config.sheets_url = val;
+            return;
           }
+          // Todos os outros campos: Sheets vence
+          DB.config[k] = val;
         });
       }
 
@@ -1538,6 +1542,9 @@ function carregarSheets() {
       SYNC_KEYS.forEach(function(k){ _localAfter[k] = (DB[k]||[]).length; });
       console.log('[YM] LOCAL DEPOIS MERGE:', JSON.stringify(_localAfter));
       console.log('[YM] Sheets merge: +' + novosRegistros + ' registros novos do Sheets');
+      console.log('[YM] CONFIG SHEETS', d.config ? JSON.stringify(d.config) : 'vazio');
+      console.log('[YM] CONFIG LOCAL', JSON.stringify({nome:DB.config.nome_usuario,meta:DB.config.meta_vendas,url:DB.config.sheets_url?'set':'empty'}));
+      console.log('[YM] NOME DASH', DB.config.nome_usuario);
 
       // Normalizar campos JSON (arrays salvos como string no Sheets)
       DB.desafios.forEach(function(d) {
@@ -3950,6 +3957,11 @@ function init(){
         var _renderCounts = {};
         SYNC_KEYS.forEach(function(k){ _renderCounts[k] = (DB[k]||[]).length; });
         console.log('[YM] RENDER EXECUTADO — DB:', JSON.stringify(_renderCounts));
+
+        // Re-renderiza saudação com nome atualizado do Sheets
+        var _h2 = new Date().getHours();
+        var _saudNome = $('dash-saudacao');
+        if(_saudNome) _saudNome.textContent = (_h2<12?'Bom dia':_h2<18?'Boa tarde':'Boa noite') + ', ' + (DB.config.nome_usuario||'YM') + '!';
 
         // Re-renderiza dashboard com dados do Sheets
         renderDash();
