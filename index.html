@@ -1370,13 +1370,12 @@ var _upsertQueue = []; // fila de upserts pendentes
 
 // Salva no localStorage IMEDIATAMENTE e agenda upsert no Sheets
 function salvarLocal() {
-  // 1. localStorage primeiro — nunca falha, é síncrono
+  // localStorage é a fonte de verdade — síncrono, nunca falha
+  // NÃO agenda saveAll automático. A sincronização com o Sheets
+  // é feita por salvarImediato() (upsert individual) a cada registro.
   try { localStorage.setItem('ym_db', JSON.stringify(DB)); } catch(e) {
     console.warn('[YM] localStorage falhou:', e);
   }
-  // 2. Sheets: agenda sincronização (debounce 1.5s para não spam)
-  clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(sincSheets, 1500);
 }
 
 // Salva registro individual imediatamente no Sheets (sem esperar debounce)
@@ -1400,6 +1399,19 @@ function salvarImediato(chave, registro) {
     console.warn('[YM] upsert falhou, dado seguro no localStorage:', e);
     setSyncDot('err');
   });
+}
+
+// Envia config individual ao Sheets (não-destrutivo — só atualiza chaves)
+function salvarConfigImediato() {
+  var url = DB.config.sheets_url;
+  if(!url) return;
+  fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'saveConfig', config: DB.config })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ if(d.ok) setSyncDot('ok'); })
+  .catch(function(e){ console.warn('[YM] config upsert falhou:', e); setSyncDot('err'); });
 }
 
 function carregarLocal() {
@@ -1430,44 +1442,67 @@ function carregarLocal() {
 }
 
 function agendarSync() {
-  clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(sincSheets, 1500);
+  // Descontinuado: a sincronização agora é por upsert individual.
+  // Mantido como no-op para compatibilidade com chamadas legadas.
 }
 
 function sincSheets() {
+  // BACKUP MANUAL — envia cada registro via upsert individual.
+  // NUNCA usa saveAll destrutivo. Nunca apaga nada do Sheets.
+  // Acionado apenas pelo botão "Sincronizar agora".
   var url = DB.config.sheets_url;
   if(!url || _syncEmAndamento) return;
 
-  // Proteção: não envia se DB está vazio (evita apagar Sheets com dados)
-  var totalRegistros = SYNC_KEYS.reduce(function(acc, k){ return acc + (DB[k]||[]).length; }, 0);
-  if(totalRegistros === 0) {
-    console.log('[YM] sincSheets: DB vazio, não enviando');
+  var fila = [];
+  SYNC_KEYS.forEach(function(k){
+    (DB[k]||[]).forEach(function(reg){
+      if(reg && reg.id) fila.push({ sheet: k, record: reg });
+    });
+  });
+
+  if(fila.length === 0) {
+    console.log('[YM] sincSheets: nada a enviar');
     return;
   }
 
   _syncEmAndamento = true;
   setSyncDot('spin');
-  console.log('[YM] sincSheets: enviando', totalRegistros, 'registros');
+  console.log('[YM] sincSheets: enviando', fila.length, 'registros via upsert');
 
-  fetch(url, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'saveAll', data: DB })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.error) throw new Error(d.error);
-    setSyncDot('ok');
-    console.log('[YM] sincSheets: ok');
-    // Re-renderizar tela ativa após sync completo
-    var _sa = document.querySelector('.section.active');
-    var _sid = _sa ? _sa.id.replace('sec-','') : '';
-    if(_sid) { renderSec(_sid); }
-  })
-  .catch(function(e){
-    setSyncDot('err');
-    console.warn('[YM] sincSheets erro (dados seguros no localStorage):', e);
-  })
-  .finally(function(){ _syncEmAndamento = false; });
+  // Envia em sequência, um upsert por registro (não-destrutivo)
+  var i = 0;
+  function enviarProximo() {
+    if(i >= fila.length) {
+      // Envia config ao final (upsert de config é seguro — só atualiza chaves)
+      fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveConfig', config: DB.config })
+      })
+      .then(function(r){ return r.json(); })
+      .catch(function(){})
+      .finally(function(){
+        _syncEmAndamento = false;
+        setSyncDot('ok');
+        console.log('[YM] sincSheets: backup completo');
+        var _sa = document.querySelector('.section.active');
+        var _sid = _sa ? _sa.id.replace('sec-','') : '';
+        if(_sid) { renderSec(_sid); }
+      });
+      return;
+    }
+    var item = fila[i++];
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'upsert', sheet: item.sheet, record: item.record })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ enviarProximo(); })
+    .catch(function(e){
+      console.warn('[YM] sincSheets upsert falhou (continua):', e);
+      enviarProximo();
+    });
+  }
+  enviarProximo();
 }
 
 function carregarSheets() {
@@ -1941,7 +1976,7 @@ function toggleHabRap(chave) {
   let hIdx = DB.habitos.findIndex(h => h.data === hj);
   if(hIdx < 0) { DB.habitos.push({id:uid(), data:hj, criado_em:hj}); hIdx = DB.habitos.length-1; }
   DB.habitos[hIdx][chave] = !boolTrue(DB.habitos[hIdx][chave]);
-  salvarLocal(); renderDash();
+  salvarLocal(); salvarImediato('habitos', DB.habitos[hIdx]); renderDash();
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1986,7 +2021,7 @@ function filtrar(m, v, el) {
 }
 function concluirTar(id) {
   const t = DB.tarefas.find(t=>t.id===id);
-  if(t){ t.status='concluida'; t.concluido_em=hoje(); salvarLocal(); refTar(); showToast('Tarefa concluída!'); }
+  if(t){ t.status='concluida'; t.concluido_em=hoje(); salvarLocal(); salvarImediato('tarefas', t); refTar(); showToast('Tarefa concluída!'); }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -2159,7 +2194,7 @@ function renderProjetos() {
 }
 function novaSub(pId){ _projPreset=pId; _openModal('subproj',null); }
 function irSubP(pId){ ir('subproj'); setTimeout(()=>{ const s=$('fsubp-proj'); if(s){s.value=pId;refSubP();} },60); }
-function toggleSubP(sid,pid){ const s=DB.subtarefasProj.find(s=>s.id===sid); if(!s)return; s.status=s.status==='concluida'?'pendente':'concluida'; salvarLocal(); renderProjetos(); }
+function toggleSubP(sid,pid){ const s=DB.subtarefasProj.find(s=>s.id===sid); if(!s)return; s.status=s.status==='concluida'?'pendente':'concluida'; salvarLocal(); salvarImediato('subtarefasProj', s); renderProjetos(); }
 function excluirSubCard(sid,pid){ if(!confirm('Excluir subtarefa?'))return; const i=DB.subtarefasProj.findIndex(s=>s.id===sid); if(i>=0)DB.subtarefasProj.splice(i,1); salvarLocal(); sheetsDelete('subtarefasProj',sid); renderProjetos(); showToast('Excluído.'); }
 
 // ──────────────────────────────────────────────────────────────
@@ -2186,7 +2221,7 @@ function refSubP() {
     </div></td>
   </tr>`).join('') : vazio('Nenhuma subtarefa.'));
 }
-function conclSubP(id){ const s=DB.subtarefasProj.find(s=>s.id===id); if(s){s.status='concluida';salvarLocal();refSubP();showToast('Concluída!');} }
+function conclSubP(id){ const s=DB.subtarefasProj.find(s=>s.id===id); if(s){s.status='concluida';salvarLocal();salvarImediato('subtarefasProj', s);refSubP();showToast('Concluída!');} }
 
 // ──────────────────────────────────────────────────────────────
 // FINANCEIRO UNIFICADO
@@ -2416,7 +2451,7 @@ function toggleHab(k, el) {
   h[k] = !boolTrue(h[k]);
   el.classList.toggle('done', boolTrue(h[k]));
   el.textContent = boolTrue(h[k]) ? '✓' : '';
-  salvarLocal();
+  salvarLocal(); salvarImediato('habitos', h);
 }
 
 function salvarHab() {
@@ -2875,6 +2910,7 @@ function toggleDiaDesafio(dsfId, data) {
   const ciclo = ['pendente','ok','falha'];
   dia.status = ciclo[(ciclo.indexOf(dia.status) + 1) % ciclo.length];
   salvarLocal();
+  salvarImediato('desafios', dsf);
   renderDesafios();
 }
 
@@ -3129,16 +3165,16 @@ function renderConfig(){
     </div>`).join(''));
 }
 function renderTags(k){ return (DB.config[k]||[]).map((v,i)=>`<span class="tag">${v}<button class="tag-x" onclick="rmTag('${k}',${i})">✕</button></span>`).join(''); }
-function addTag(k){ const el=$('ti-'+k); const v=el.value.trim(); if(!v)return; (DB.config[k]=DB.config[k]||[]).push(v); el.value=''; salvarLocal(); R('tags-'+k,renderTags(k)); showToast('Adicionado!'); }
-function rmTag(k,i){ DB.config[k].splice(i,1); salvarLocal(); R('tags-'+k,renderTags(k)); }
-function salvarCfg(){ DB.config.nome_usuario=$('cfg-nome').value; DB.config.meta_vendas=Number($('cfg-meta').value); salvarLocal(); showToast('Configurações salvas!'); }
+function addTag(k){ const el=$('ti-'+k); const v=el.value.trim(); if(!v)return; (DB.config[k]=DB.config[k]||[]).push(v); el.value=''; salvarLocal(); salvarConfigImediato(); R('tags-'+k,renderTags(k)); showToast('Adicionado!'); }
+function rmTag(k,i){ DB.config[k].splice(i,1); salvarLocal(); salvarConfigImediato(); R('tags-'+k,renderTags(k)); }
+function salvarCfg(){ DB.config.nome_usuario=$('cfg-nome').value; DB.config.meta_vendas=Number($('cfg-meta').value); salvarLocal(); salvarConfigImediato(); showToast('Configurações salvas!'); }
 function salvarCfgPerfil() {
   DB.config.altura_cm        = Number($('cfg-altura')?.value || 0);
   DB.config.peso_ref         = Number($('cfg-peso-ref')?.value || 0);
   DB.config.idade            = Number($('cfg-idade')?.value || 0);
   DB.config.sexo             = $('cfg-sexo')?.value || 'feminino';
   DB.config.nivel_atividade  = $('cfg-atividade')?.value || 'moderado';
-  salvarLocal();
+  salvarLocal(); salvarConfigImediato();
   showToast('Perfil metabólico salvo!');
   atualizarTMBPreview();
 }
@@ -3163,7 +3199,7 @@ function renderSheets(){ const u=$('sh-url'); if(u) u.value=DB.config.sheets_url
 function shSalvar(){
   const url=($('sh-url').value||'').trim();
   if(url&&!url.startsWith('https://script.google.com')){ showToast('URL inválida.'); return; }
-  DB.config.sheets_url=url; salvarLocal(); showToast('URL salva!');
+  DB.config.sheets_url=url; salvarLocal(); salvarConfigImediato(); showToast('URL salva!');
   if(url) shTestar();
 }
 function shTestar(){
